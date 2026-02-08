@@ -4,15 +4,26 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import OrganizerHeader from '@/components/organizer/layout/OrganizerHeader';
-import TicketTypeManager from '@/components/organizer/events/TicketTypeManager';
-import { eventService } from '@/service/organizer/event.service';
-import { CreateEventDto, CreateTicketDto, Category } from '@/types/event.types';
+import TicketTypeManager from '@/components/organizer/events/create/TicketTypeManager';
+import { useEvent } from '@/hooks/useEvent';
+import { useCategory } from '@/hooks/useCategory';
+import { CreateEventDto, CreateTicketDto } from '@/types/event.types';
+
+
+// Import new components
+import EventFormHeader from '@/components/organizer/events/create/EventFormHeader';
+import BasicInfoForm from '@/components/organizer/events/create/BasicInfoForm';
+import BannerUpload from '@/components/organizer/events/create/BannerUpload';
+import FormActions from '@/components/organizer/events/create/FormActions';
 
 export default function CreateEventPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  
+  // Use hooks
+  const { createEvent, loading: eventLoading } = useEvent();
+  const { categories, loading: loadingCategories, error: categoriesError } = useCategory();
   
   const [formData, setFormData] = useState<CreateEventDto>({
     categoryId: 0,
@@ -25,24 +36,42 @@ export default function CreateEventPage() {
   });
 
   useEffect(() => {
-    fetchCategories();
+    // Categories are automatically fetched by useCategory hook
   }, []);
-
-  const fetchCategories = async () => {
-    try {
-      const response = await eventService.getCategories();
-      if (response.success && response.data?.categories) {
-        setCategories(response.data.categories);
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Không thể tải danh sách danh mục');
-    } finally {
-      setLoadingCategories(false);
-    }
-  };
 
   const handleInputChange = (field: keyof CreateEventDto, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Check file size (10MB limit)
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('Kích thước file không được vượt quá 10MB');
+        return;
+      }
+
+      // Check file type
+      if (!file.type.match(/image\/(jpeg|jpg|png|gif|webp)$/)) {
+        toast.error('Chỉ chấp nhận file ảnh (jpg, png, gif, webp)');
+        return;
+      }
+
+      setBannerFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setBannerPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveBanner = () => {
+    setBannerFile(null);
+    setBannerPreview(null);
   };
 
   const handleTicketTypesChange = (ticketTypes: CreateTicketDto[]) => {
@@ -75,7 +104,7 @@ export default function CreateEventPage() {
     }
     
     if (!formData.ticketTypes || formData.ticketTypes.length === 0) {
-      return 'Vui lòng thêm ít nhất một loại vé';
+      return 'Phải có ít nhất một loại vé';
     }
     
     // Validate ticket types
@@ -103,24 +132,71 @@ export default function CreateEventPage() {
       return;
     }
     
-    setLoading(true);
-    
     try {
-      const response = await eventService.createEvent(formData);
+      // Create FormData for file upload
+      const submitData = new FormData();
       
-      if (response.success && response.data?.event) {
+      // Add form fields
+      submitData.append('categoryId', formData.categoryId.toString());
+      submitData.append('title', formData.title);
+      if (formData.description) {
+        submitData.append('description', formData.description);
+      }
+      submitData.append('location', formData.location);
+      submitData.append('startTime', formData.startTime);
+      submitData.append('endTime', formData.endTime);
+      
+      // Don't send banner file - backend doesn't accept it
+      // if (bannerFile) {
+      //   submitData.append('banner', bannerFile);
+      // }
+      
+      // Add ticket types as individual FormData entries
+      if (formData.ticketTypes && formData.ticketTypes.length > 0) {
+        formData.ticketTypes.forEach((ticket, index) => {
+          submitData.append(`ticketTypes[${index}].name`, ticket.name);
+          if (ticket.type) {
+            submitData.append(`ticketTypes[${index}].type`, ticket.type);
+          }
+          submitData.append(`ticketTypes[${index}].price`, ticket.price.toString());
+          submitData.append(`ticketTypes[${index}].quantityLimit`, ticket.quantityLimit.toString());
+          if (ticket.startSaleTime) {
+            submitData.append(`ticketTypes[${index}].startSaleTime`, ticket.startSaleTime);
+          }
+          if (ticket.endSaleTime) {
+            submitData.append(`ticketTypes[${index}].endSaleTime`, ticket.endSaleTime);
+          }
+          if (ticket.description) {
+            submitData.append(`ticketTypes[${index}].description`, ticket.description);
+          }
+        });
+      }
+      
+      // Debug: Log FormData contents
+      console.log('FormData contents:');
+      for (let [key, value] of submitData.entries()) {
+        console.log(`${key}:`, value);
+      }
+      
+      // Add settings if exists
+      if (formData.settings) {
+        submitData.append('settings', typeof formData.settings === 'string' 
+          ? formData.settings 
+          : JSON.stringify(formData.settings)
+        );
+      }
+      
+      const event = await createEvent(submitData);
+      
+      if (event) {
         toast.success('Tạo sự kiện thành công! Đang chuyển hướng...');
         
         setTimeout(() => {
-          router.push(`/organizer/events/${response.data!.event.id}/preview`);
+          router.push(`/organizer/events/${event.id}/preview`);
         }, 1500);
-      } else {
-        throw new Error(response.message || 'Tạo sự kiện thất bại');
       }
     } catch (error: any) {
       toast.error(error.message || 'Tạo sự kiện thất bại. Vui lòng thử lại.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -130,24 +206,18 @@ export default function CreateEventPage() {
       return;
     }
     
-    setLoading(true);
-    
     try {
-      const response = await eventService.createEvent(formData);
+      const event = await createEvent(formData);
       
-      if (response.success && response.data?.event) {
+      if (event) {
         toast.success('Lưu nháp thành công!');
         
         setTimeout(() => {
-          router.push(`/organizer/events/${response.data!.event.id}/edit`);
+          router.push(`/organizer/events/${event.id}/edit`);
         }, 1500);
-      } else {
-        throw new Error(response.message || 'Lưu nháp thất bại');
       }
     } catch (error: any) {
       toast.error(error.message || 'Lưu nháp thất bại. Vui lòng thử lại.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -170,137 +240,36 @@ export default function CreateEventPage() {
       
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="max-w-4xl mx-auto">
-          <div className="mb-6 lg:mb-8">
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Tạo sự kiện mới</h1>
-            <p className="text-gray-600 mt-1 text-sm lg:text-base">
-              Điền thông tin chi tiết để tạo sự kiện mới. Sự kiện sẽ được lưu dưới dạng nháp và bạn có thể gửi phê duyệt sau.
-            </p>
-          </div>
+          <EventFormHeader
+            title="Tạo sự kiện mới"
+            description="Điền thông tin chi tiết để tạo sự kiện mới. Sự kiện sẽ được lưu dưới dạng nháp và bạn có thể gửi phê duyệt sau."
+          />
           
           <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Basic Information */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Thông tin cơ bản</h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Danh mục sự kiện *
-                  </label>
-                  <select
-                    value={formData.categoryId}
-                    onChange={(e) => handleInputChange('categoryId', Number(e.target.value))}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  >
-                    <option value={0}>-- Chọn danh mục --</option>
-                    {categories.map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Tiêu đề sự kiện *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) => handleInputChange('title', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Nhập tiêu đề sự kiện"
-                    maxLength={255}
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="mt-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Mô tả sự kiện
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={4}
-                  placeholder="Mô tả chi tiết về sự kiện của bạn..."
-                />
-              </div>
-              
-              <div className="mt-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Địa điểm tổ chức *
-                </label>
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={(e) => handleInputChange('location', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Nhập địa điểm tổ chức sự kiện"
-                  maxLength={255}
-                  required
-                />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Thời gian bắt đầu *
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={formData.startTime}
-                    onChange={(e) => handleInputChange('startTime', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Thời gian kết thúc *
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={formData.endTime}
-                    onChange={(e) => handleInputChange('endTime', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    min={formData.startTime}
-                    required
-                  />
-                </div>
-              </div>
-            </div>
+            <BasicInfoForm
+              formData={formData}
+              categories={categories}
+              loadingCategories={loadingCategories}
+              onInputChange={handleInputChange}
+            />
             
-            {/* Ticket Types */}
+            <BannerUpload
+              bannerFile={bannerFile}
+              bannerPreview={bannerPreview}
+              onBannerChange={handleBannerChange}
+              onRemoveBanner={handleRemoveBanner}
+            />
+            
             <TicketTypeManager
               ticketTypes={formData.ticketTypes || []}
               onTicketTypesChange={handleTicketTypesChange}
             />
             
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-end">
-              <button
-                type="button"
-                onClick={handleSaveDraft}
-                disabled={loading}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Đang lưu...' : 'Lưu nháp'}
-              </button>
-              
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Đang tạo...' : 'Tạo sự kiện'}
-              </button>
-            </div>
+            <FormActions
+              loading={eventLoading}
+              onSaveDraft={handleSaveDraft}
+              onSubmit={handleSubmit}
+            />
           </form>
         </div>
       </div>

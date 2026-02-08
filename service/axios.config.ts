@@ -9,7 +9,7 @@ const api = axios.create({
   },
 });
 
-// Response interceptor - return response.data for consistent API responses
+// Response interceptor - return full response for consistent API responses
 api.interceptors.response.use(
   (response) => {
     return response.data;

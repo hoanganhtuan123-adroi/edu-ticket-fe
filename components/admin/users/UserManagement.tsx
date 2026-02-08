@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CreateUserForm from './CreateUserForm';
+import EditUserForm from './EditUserForm';
 import UserList from './UserList';
 import { UserResponse } from '@/service/admin/user.service';
 
@@ -18,9 +19,11 @@ export default function UserManagement() {
 
   const handleEditUser = (user: UserResponse) => {
     setEditingUser(user);
-    // Note: You would need to create an EditUserForm component for editing
-    // For now, we'll just show a placeholder
-    alert(`Chức năng sửa người dùng ${user.fullName} sẽ được triển khai sau`);
+  };
+
+  const handleEditSuccess = () => {
+    setEditingUser(null);
+    setRefreshTrigger(prev => prev + 1);
   };
 
   const handleCancelEdit = () => {
@@ -71,7 +74,7 @@ export default function UserManagement() {
         )}
       </AnimatePresence>
 
-      {/* Edit User Form Modal (Placeholder) */}
+      {/* Edit User Form Modal */}
       <AnimatePresence>
         {editingUser && (
           <motion.div
@@ -85,34 +88,13 @@ export default function UserManagement() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="w-full h-full max-w-6xl max-h-[90vh] overflow-y-auto"
+              className="w-full h-full max-w-4xl max-h-[95vh] overflow-y-auto flex items-center justify-center"
             >
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900">
-                    Chỉnh sửa người dùng: {editingUser.fullName}
-                  </h2>
-                  <button
-                    onClick={handleCancelEdit}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-                <div className="text-center py-8 text-gray-500">
-                  Chức năng chỉnh sửa người dùng sẽ được triển khai sau.
-                </div>
-                <div className="flex justify-end">
-                  <button
-                    onClick={handleCancelEdit}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    Đóng
-                  </button>
-                </div>
-              </div>
+              <EditUserForm
+                userId={editingUser.id}
+                onSuccess={handleEditSuccess}
+                onCancel={handleCancelEdit}
+              />
             </motion.div>
           </motion.div>
         )}

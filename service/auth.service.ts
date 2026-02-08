@@ -15,14 +15,19 @@ export interface LoginResponse {
 }
 
 export interface VerifyTokenResponse {
-  success: boolean;
-  message: string;
+  success?: boolean;
+  message?: string;
   data?: {
     payload: {
       userId: string;
       email: string;
       role: string;
     };
+  };
+  payload?: {
+    userId: string;
+    email: string;
+    role: string;
   };
   timestamp?: string;
 }
@@ -31,7 +36,6 @@ export const authService = {
   // Login for all roles
   login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
     try {
-      console.log('Sending login request with credentials:', { email: credentials.email, password: '***' });
       const response = await api.post('/auth/login', credentials) as LoginResponse;
 
       // Response is already processed by interceptor, so response is the data directly
@@ -80,7 +84,7 @@ export const authService = {
   getProfile: async (): Promise<any> => {
     try {
       const response = await api.get('/auth/profile');
-      return response.data;
+      return response;
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Không thể lấy thông tin người dùng';
       toast.error(errorMessage);
@@ -108,7 +112,7 @@ export const authService = {
           'Authorization': `Bearer ${token}`
         }
       });
-      return response.data;
+      return response;
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Token không hợp lệ';
       toast.error(errorMessage);

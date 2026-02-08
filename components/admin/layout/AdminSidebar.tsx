@@ -11,7 +11,8 @@ import {
   Settings, 
   LogOut,
   Bell,
-  X
+  X,
+  Tags
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -22,6 +23,7 @@ const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/admin/dashboard' },
   { icon: Users, label: 'Quản lý người dùng', href: '/admin/users' },
   { icon: Shield, label: 'Quản lý vai trò', href: '/admin/roles' },
+  { icon: Tags, label: 'Quản lý danh mục', href: '/admin/category' },
   { icon: CalendarCheck, label: 'Kiểm duyệt sự kiện', href: '/admin/events', badge: '5' },
   { icon: BarChart3, label: 'Báo cáo thống kê', href: '/admin/reports' },
 ];
@@ -66,19 +68,6 @@ export default function AdminSidebar({ onClose }: AdminSidebarProps) {
           <div>
             <h1 className="text-lg lg:text-xl font-bold">EventTicket.edu</h1>
             <p className="text-xs lg:text-sm text-gray-400">Admin Panel</p>
-          </div>
-        </div>
-      </div>
-
-      {/* User Info */}
-      <div className="p-3 lg:p-4 border-b border-gray-800">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 lg:w-10 h-8 lg:h-10 bg-blue-600 rounded-full flex items-center justify-center">
-            <span className="text-xs lg:text-sm font-medium">A</span>
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium truncate">Admin User</p>
-            <p className="text-xs text-gray-400 hidden sm:block">Quản trị viên</p>
           </div>
         </div>
       </div>

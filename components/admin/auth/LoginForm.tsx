@@ -1,12 +1,12 @@
 "use client";
 
-import { useAuth } from "@/hooks/useAuth";
+import { useAdminAuth } from "@/hooks/auth/useAdminAuth";
 import PasswordInput from "./PasswordInput";
 import { motion } from "framer-motion";
 
 export default function LoginForm() {
   const { email, password, setEmail, setPassword, submit, isLoading } =
-    useAuth();
+    useAdminAuth();
 
   return (
     <div className="bg-white p-6 sm:p-8 lg:p-12 lg:w-3/5 rounded-r-2xl lg:rounded-r-2xl shadow-2xl flex-1">

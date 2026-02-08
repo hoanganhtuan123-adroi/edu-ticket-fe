@@ -1,55 +1,29 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { userService, FilterUserDto, UserResponse, SystemRole, PaginationResponse } from '@/service/admin/user.service';
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useUsers } from '@/hooks/useUsers';
+import { userService, SystemRole } from '@/service/admin/user.service';
 
 interface UserListProps {
-  onEditUser?: (user: UserResponse) => void;
+  onEditUser?: (user: any) => void;
   refreshTrigger?: number;
 }
 
 export default function UserList({ onEditUser, refreshTrigger }: UserListProps) {
-  const [users, setUsers] = useState<UserResponse[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState<PaginationResponse<UserResponse> | null>(null);
-  const [filters, setFilters] = useState<FilterUserDto>({
-    limit: 10,
-    offset: 0,
-  });
-
-  const fetchUsers = async () => {
-    setLoading(true);
-    try {
-      const response = await userService.getAllUsers(filters);
-      if (response.success && response.data) {
-        setUsers(response.data.data);
-        setPagination(response.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch users:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  const { users, loading, pagination, filters, error, setFilters, handlePageChange, refreshUsers, clearError } = useUsers();
   useEffect(() => {
-    fetchUsers();
-  }, [filters, refreshTrigger]);
+    if (refreshTrigger) {
+      refreshUsers();
+    }
+  }, [refreshTrigger, refreshUsers]);
 
-  const handleFilterChange = (key: keyof FilterUserDto, value: string) => {
-    setFilters(prev => ({
-      ...prev,
+  const handleFilterChange = (key: keyof typeof filters, value: string) => {
+    setFilters({
+      ...filters,
       [key]: value || undefined,
       offset: 0, // Reset to first page when filtering
-    }));
-  };
-
-  const handlePageChange = (newOffset: number) => {
-    setFilters(prev => ({
-      ...prev,
-      offset: newOffset,
-    }));
+    });
   };
 
   const getRoleBadgeColor = (role: SystemRole) => {
@@ -85,7 +59,7 @@ export default function UserList({ onEditUser, refreshTrigger }: UserListProps) 
 
     try {
       await userService.deleteUser(userId);
-      fetchUsers(); // Refresh the list
+      refreshUsers(); // Refresh the list
     } catch (error) {
       console.error('Failed to delete user:', error);
       alert('Xóa người dùng thất bại');
@@ -160,6 +134,21 @@ export default function UserList({ onEditUser, refreshTrigger }: UserListProps) 
           </div>
         </div>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div className="text-red-800">{error}</div>
+            <button
+              onClick={clearError}
+              className="text-red-600 hover:text-red-800"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* User List */}
       <div className="overflow-x-auto">
@@ -258,26 +247,26 @@ export default function UserList({ onEditUser, refreshTrigger }: UserListProps) 
       </div>
 
       {/* Pagination */}
-      {pagination && pagination.totalPages > 1 && (
+      {pagination && pagination.pagination && (
         <div className="px-6 py-4 border-t border-gray-200">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-700">
-              Hiển thị {pagination.offset + 1} - {Math.min(pagination.offset + pagination.limit, pagination.total)} của {pagination.total} kết quả
+              Hiển thị {pagination.offset + 1} - {Math.min(pagination.offset + pagination.limit, pagination.pagination.total)} của {pagination.pagination.total} kết quả
             </div>
             <div className="flex space-x-2">
               <button
                 onClick={() => handlePageChange(Math.max(0, pagination.offset - pagination.limit))}
-                disabled={pagination.offset === 0}
+                disabled={!pagination.pagination.hasPrev}
                 className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 Trước
               </button>
               <span className="px-3 py-1 text-sm text-gray-700">
-                Trang {Math.floor(pagination.offset / pagination.limit) + 1} / {pagination.totalPages}
+                Trang {Math.floor(pagination.offset / pagination.limit) + 1}
               </span>
               <button
-                onClick={() => handlePageChange(Math.min(pagination.offset + pagination.limit, (pagination.totalPages - 1) * pagination.limit))}
-                disabled={pagination.offset >= (pagination.totalPages - 1) * pagination.limit}
+                onClick={() => handlePageChange(pagination.offset + pagination.limit)}
+                disabled={!pagination.pagination.hasNext}
                 className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 Sau

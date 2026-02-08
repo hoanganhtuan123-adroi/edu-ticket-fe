@@ -4,15 +4,15 @@ import { z } from 'zod';
 // Helper function to get admin token from cookies
 const getAdminToken = () => {
   if (typeof window === 'undefined') return null;
-  
+
   // Get cookies from document
   const cookies = document.cookie.split(';');
   const adminCookie = cookies.find(cookie => cookie.trim().startsWith('USER_ADMIN='));
-  
+
   if (adminCookie) {
     return adminCookie.split('=')[1];
   }
-  
+
   return null;
 };
 
@@ -60,7 +60,7 @@ export interface FilterUserDto {
 }
 
 export interface UserResponse {
-  id: number;
+  id: string; // Changed from number to string to match API response
   email: string;
   systemRole: SystemRole;
   fullName: string;
@@ -83,10 +83,17 @@ export interface UserDetailResponse {
 
 export interface PaginationResponse<T> {
   data: T[];
+  pagination: {
+    limit: number;
+    offset: number;
+    total: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
   total: number;
   limit: number;
   offset: number;
-  totalPages: number;
+  totalPages?: number;
 }
 
 export interface ApiResponse<T> {
@@ -110,14 +117,14 @@ export const userService = {
   },
 
   // Get all users with filters
-  getAllUsers: async (filters: FilterUserDto): Promise<ApiResponse<PaginationResponse<UserResponse>>> => {
+  getAllUsers: async (filters: FilterUserDto): Promise<any> => {
     try {
       const token = getAdminToken();
-      const response = await api.get('/users/list-users', { 
+      const response = await api.get('/users/list-users', {
         params: filters,
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
-      return response.data;
+      return response;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Lấy danh sách người dùng thất bại');
     }
@@ -127,25 +134,25 @@ export const userService = {
   getUserDetail: async (id: string): Promise<ApiResponse<UserDetailResponse>> => {
     try {
       const token = getAdminToken();
-      const response = await api.get(`/users/${id}/detail`, {
+      const response: ApiResponse<UserDetailResponse> = await api.get(`/users/${id}/detail`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
-      return response.data;
+      return response;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Lấy chi tiết người dùng thất bại');
     }
   },
 
   // Update user
-  updateUser: async (id: number, userData: Partial<CreateUserDto>): Promise<ApiResponse<object>> => {
+  updateUser: async (id: string, userData: Partial<CreateUserDto>): Promise<ApiResponse<any>> => {
     try {
       const token = getAdminToken();
-      const response = await api.patch(`/users/update/${id}`, userData, {
+      const response: ApiResponse<any> = await api.patch(`/users/update/${id}`, userData, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
-      return response.data;
+      return response;
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Cập nhật người dùng thất bại');
+      throw new Error(error.response?.message || 'Cập nhật người dùng thất bại');
     }
   },
 

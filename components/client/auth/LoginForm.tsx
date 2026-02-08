@@ -1,12 +1,12 @@
 "use client";
 
-import { useOrganizerAuth } from "@/hooks/auth/useOrganizerAuth";
-import PasswordInput from "./PasswordInput"
+import { useUserAuth } from "@/hooks/auth/useUserAuth";
+import PasswordInput from "./PasswordInput";
 import { motion } from "framer-motion";
 
 export default function LoginForm() {
   const { email, password, setEmail, setPassword, submit, isLoading } =
-    useOrganizerAuth();
+    useUserAuth();
 
   return (
     <div className="bg-white p-6 sm:p-8 lg:p-12 lg:w-3/5 rounded-r-2xl lg:rounded-r-2xl shadow-2xl flex-1">
@@ -18,17 +18,17 @@ export default function LoginForm() {
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
           <motion.div 
-            className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-linear-to-br from-green-500 to-teal-600 rounded-xl sm:rounded-2xl mb-3 sm:mb-4 shadow-lg"
+            className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-linear-to-br from-blue-500 to-purple-600 rounded-xl sm:rounded-2xl mb-3 sm:mb-4 shadow-lg"
             whileHover={{ scale: 1.05, rotate: 5 }}
             transition={{ duration: 0.2 }}
           >
-            <i className="fas fa-calendar-alt text-white text-lg sm:text-2xl"></i>
+            <i className="fas fa-user text-white text-lg sm:text-2xl"></i>
           </motion.div>
           <h3 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
             Đăng nhập tài khoản
           </h3>
           <p className="text-gray-600 text-sm sm:text-base px-2">
-            Chào mừng nhà tổ chức! Vui lòng đăng nhập để quản lý sự kiện
+            Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục
           </p>
         </motion.div>
 
@@ -55,7 +55,7 @@ export default function LoginForm() {
               <motion.input
                 id="email"
                 type="email"
-                className="w-full pl-9 sm:pl-12 pr-4 py-3 sm:py-4 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:border-green-500 focus:outline-none transition-all duration-300 hover:border-gray-300 text-sm sm:text-base"
+                className="w-full pl-9 sm:pl-12 pr-4 py-3 sm:py-4 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-all duration-300 hover:border-gray-300 text-sm sm:text-base"
                 placeholder="Nhập email của bạn"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -87,7 +87,7 @@ export default function LoginForm() {
               <input
                 id="remember"
                 type="checkbox"
-                className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <label htmlFor="remember" className="ml-2 block text-sm text-gray-700">
                 Ghi nhớ đăng nhập
@@ -95,7 +95,7 @@ export default function LoginForm() {
             </div>
             <motion.a 
               href="#" 
-              className="text-sm text-green-600 hover:text-green-500 transition-colors text-center sm:text-left"
+              className="text-sm text-blue-600 hover:text-blue-500 transition-colors text-center sm:text-left"
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.2 }}
             >
@@ -106,7 +106,7 @@ export default function LoginForm() {
           <motion.button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 sm:py-4 rounded-xl text-white font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 bg-linear-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            className="w-full py-3 sm:py-4 rounded-xl text-white font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 bg-linear-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6, ease: "easeOut" }}
