@@ -1,6 +1,6 @@
-import AdminHeader from '@/app/components/admin/layout/AdminHeader';
-import EventModerationList from '@/app/components/admin/events/EventModerationList';
-import RecentApprovedEvents from '@/app/components/admin/events/RecentApprovedEvents';
+import AdminHeader from '@/components/admin/layout/AdminHeader';
+import EventModerationList from '@/components/admin/events/EventModerationList';
+import RecentApprovedEvents from '@/components/admin/events/RecentApprovedEvents';
 
 export default function EventModeration() {
   return (

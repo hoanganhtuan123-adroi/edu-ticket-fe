@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@/app/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 import PasswordInput from "./PasswordInput";
 import { motion } from "framer-motion";
 
@@ -9,32 +9,32 @@ export default function LoginForm() {
     useAuth();
 
   return (
-    <div className="bg-white p-8 md:p-12 md:w-3/5 rounded-r-2xl shadow-2xl">
-      <div className="max-w-md mx-auto">
+    <div className="bg-white p-6 sm:p-8 lg:p-12 lg:w-3/5 rounded-r-2xl lg:rounded-r-2xl shadow-2xl flex-1">
+      <div className="max-w-md mx-auto w-full">
         <motion.div 
-          className="text-center mb-8"
+          className="text-center mb-6 sm:mb-8"
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
           <motion.div 
-            className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-blue-500 to-purple-600 rounded-2xl mb-4 shadow-lg"
+            className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-linear-to-br from-blue-500 to-purple-600 rounded-xl sm:rounded-2xl mb-3 sm:mb-4 shadow-lg"
             whileHover={{ scale: 1.05, rotate: 5 }}
             transition={{ duration: 0.2 }}
           >
-            <i className="fas fa-user text-white text-2xl"></i>
+            <i className="fas fa-user text-white text-lg sm:text-2xl"></i>
           </motion.div>
-          <h3 className="text-3xl font-bold text-gray-800 mb-2">
+          <h3 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
             Đăng nhập tài khoản
           </h3>
-          <p className="text-gray-600">
+          <p className="text-gray-600 text-sm sm:text-base px-2">
             Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục
           </p>
         </motion.div>
 
         <motion.form 
           onSubmit={submit} 
-          className="space-y-6"
+          className="space-y-4 sm:space-y-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
@@ -49,13 +49,13 @@ export default function LoginForm() {
               Email
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <i className="fas fa-user text-gray-400"></i>
+              <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                <i className="fas fa-user text-gray-400 text-sm sm:text-base"></i>
               </div>
               <motion.input
                 id="email"
                 type="email"
-                className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-all duration-300 hover:border-gray-300"
+                className="w-full pl-9 sm:pl-12 pr-4 py-3 sm:py-4 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-all duration-300 hover:border-gray-300 text-sm sm:text-base"
                 placeholder="Nhập email của bạn"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -78,7 +78,7 @@ export default function LoginForm() {
           </motion.div>
 
           <motion.div 
-            className="flex items-center justify-between"
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
@@ -95,7 +95,7 @@ export default function LoginForm() {
             </div>
             <motion.a 
               href="#" 
-              className="text-sm text-blue-600 hover:text-blue-500 transition-colors"
+              className="text-sm text-blue-600 hover:text-blue-500 transition-colors text-center sm:text-left"
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.2 }}
             >
@@ -106,7 +106,7 @@ export default function LoginForm() {
           <motion.button
             type="submit"
             disabled={isLoading}
-            className="w-full py-4 rounded-xl text-white font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 bg-linear-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            className="w-full py-3 sm:py-4 rounded-xl text-white font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 bg-linear-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6, ease: "easeOut" }}
@@ -116,15 +116,15 @@ export default function LoginForm() {
             <span className="flex items-center justify-center space-x-2">
               {isLoading ? (
                 <>
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  <span>Đang đăng nhập...</span>
+                  <span className="text-sm sm:text-base">Đang đăng nhập...</span>
                 </>
               ) : (
                 <>
-                  <span>Đăng nhập</span>
+                  <span className="text-sm sm:text-base">Đăng nhập</span>
                   <motion.i 
                     className="fas fa-arrow-right"
                     whileHover={{ x: 5 }}
