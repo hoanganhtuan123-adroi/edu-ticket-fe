@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import CreateUserForm from './CreateUserForm';
 import EditUserForm from './EditUserForm';
 import UserList from './UserList';
 import { UserResponse } from '@/service/admin/user.service';
 
 export default function UserManagement() {
+  const router = useRouter();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingUser, setEditingUser] = useState<UserResponse | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -19,6 +21,10 @@ export default function UserManagement() {
 
   const handleEditUser = (user: UserResponse) => {
     setEditingUser(user);
+  };
+
+  const handleViewUser = (userId: string) => {
+    router.push(`/admin/users/${userId}`);
   };
 
   const handleEditSuccess = () => {
@@ -103,6 +109,7 @@ export default function UserManagement() {
       {/* User List */}
       <UserList
         onEditUser={handleEditUser}
+        onViewUser={handleViewUser}
         refreshTrigger={refreshTrigger}
       />
     </div>

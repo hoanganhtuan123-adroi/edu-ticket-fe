@@ -7,10 +7,11 @@ import { userService, SystemRole } from '@/service/admin/user.service';
 
 interface UserListProps {
   onEditUser?: (user: any) => void;
+  onViewUser?: (userId: string) => void;
   refreshTrigger?: number;
 }
 
-export default function UserList({ onEditUser, refreshTrigger }: UserListProps) {
+export default function UserList({ onEditUser, onViewUser, refreshTrigger }: UserListProps) {
   const { users, loading, pagination, filters, error, setFilters, handlePageChange, refreshUsers, clearError } = useUsers();
   useEffect(() => {
     if (refreshTrigger) {
@@ -223,6 +224,14 @@ export default function UserList({ onEditUser, refreshTrigger }: UserListProps) 
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
+                      {onViewUser && (
+                        <button
+                          onClick={() => onViewUser(user.id.toString())}
+                          className="text-green-600 hover:text-green-900 transition-colors"
+                        >
+                          Xem
+                        </button>
+                      )}
                       {onEditUser && (
                         <button
                           onClick={() => onEditUser(user)}

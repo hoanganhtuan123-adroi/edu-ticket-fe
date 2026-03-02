@@ -168,4 +168,17 @@ export const userService = {
       throw new Error(error.response?.data?.message || 'Xóa người dùng thất bại');
     }
   },
+
+  // Lock/Unlock user
+  lockUnlockUser: async (id: string, isActive: boolean): Promise<ApiResponse<object>> => {
+    try {
+      const token = getAdminToken();
+      const response: ApiResponse<object> = await api.patch(`/users/${id}/lock`, { isActive }, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      return response;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Cập nhật trạng thái người dùng thất bại');
+    }
+  },
 };

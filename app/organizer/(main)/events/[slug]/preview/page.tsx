@@ -375,10 +375,10 @@ export default function EventPreviewPage() {
                 </div>
               ) : selectedAttachment.fileType === 'application/msword' || 
                      selectedAttachment.fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ? (
-                // Word document preview using Google Docs Viewer
+                // Word document preview using Microsoft Office Online Viewer
                 <div className="flex justify-center">
                   <iframe
-                    src={`https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(`http://localhost:8080${selectedAttachment.fileUrl}`)}`}
+                    src={`https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(`http://localhost:8080${selectedAttachment.fileUrl}`)}`}
                     className="w-full h-[60vh] rounded-lg border border-gray-200"
                     title={selectedAttachment.fileName}
                   />

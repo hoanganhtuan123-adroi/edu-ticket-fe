@@ -9,9 +9,11 @@ import {
   CheckCircle,
   XCircle,
   Download,
-  FileText
+  FileText,
+  X
 } from 'lucide-react';
 import { AdminEventDetail } from '@/service/admin/event.service';
+import { useState } from 'react';
 
 interface AdminEventDetailContentProps {
   event: AdminEventDetail;
@@ -20,6 +22,7 @@ interface AdminEventDetailContentProps {
 }
 
 export default function AdminEventDetailContent({ event, onApprove, onReject }: AdminEventDetailContentProps) {
+  const [selectedAttachment, setSelectedAttachment] = useState<any>(null);
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('vi-VN', {
       day: '2-digit',
@@ -312,7 +315,10 @@ export default function AdminEventDetailContent({ event, onApprove, onReject }: 
                   {event.attachments.map((attachment: any) => (
                     <div key={attachment.id} className="bg-white rounded-lg p-3 border border-gray-200">
                       <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
+                        <div 
+                          className="flex-1 min-w-0 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                          onClick={() => setSelectedAttachment(attachment)}
+                        >
                           <div className="flex items-center gap-2 mb-2">
                             <FileText className="w-4 h-4 text-gray-400 shrink-0" />
                             <span className="text-sm font-medium text-gray-900 truncate">
@@ -329,6 +335,7 @@ export default function AdminEventDetailContent({ event, onApprove, onReject }: 
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shrink-0"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           <Download className="w-4 h-4" />
                           Tải xuống
@@ -401,6 +408,111 @@ export default function AdminEventDetailContent({ event, onApprove, onReject }: 
           </div>
         </div>
       </div>
+      
+      {/* File Preview Modal */}
+      {selectedAttachment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-4xl max-h-[90vh] w-full overflow-hidden shadow-2xl">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-semibold text-gray-900 truncate">
+                  {selectedAttachment.fileName}
+                </h3>
+                <p className="text-sm text-gray-500">
+                  {getFileTypeLabel(selectedAttachment.fileType)} • {formatFileSize(selectedAttachment.fileSize)}
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedAttachment(null)}
+                className="ml-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* Modal Content */}
+            <div className="p-6 overflow-auto max-h-[calc(90vh-120px)]">
+              {selectedAttachment.fileType.startsWith('image/') ? (
+                // Image preview
+                <div className="flex justify-center">
+                  <img
+                    src={`http://localhost:8080${selectedAttachment.fileUrl}`}
+                    alt={selectedAttachment.fileName}
+                    className="max-w-full max-h-[60vh] object-contain rounded-lg shadow-lg"
+                  />
+                </div>
+              ) : selectedAttachment.fileType === 'application/pdf' ? (
+                // PDF preview
+                <div className="flex justify-center">
+                  <iframe
+                    src={`http://localhost:8080${selectedAttachment.fileUrl}`}
+                    className="w-full h-[60vh] rounded-lg border border-gray-200"
+                    title={selectedAttachment.fileName}
+                  />
+                </div>
+              ) : selectedAttachment.fileType === 'application/msword' || 
+                     selectedAttachment.fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ? (
+                // Word document preview using Microsoft Office Online Viewer
+                <div className="flex justify-center">
+                  <iframe
+                    src={`https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(`http://localhost:8080${selectedAttachment.fileUrl}`)}`}
+                    className="w-full h-[60vh] rounded-lg border border-gray-200"
+                    title={selectedAttachment.fileName}
+                  />
+                </div>
+              ) : selectedAttachment.fileType.includes('text/') || 
+                     selectedAttachment.fileType === 'application/json' ||
+                     selectedAttachment.fileType.includes('xml') ? (
+                // Text file preview
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <iframe
+                    src={`http://localhost:8080${selectedAttachment.fileUrl}`}
+                    className="w-full h-[60vh] bg-white rounded border border-gray-300 font-mono text-sm"
+                    title={selectedAttachment.fileName}
+                  />
+                </div>
+              ) : (
+                // Unsupported file type
+                <div className="text-center py-12">
+                  <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707L19.586 4.414A1 1 0 0119 3.586V16a1 1 0 01-1 1h-1z" />
+                  </svg>
+                  <p className="text-gray-600 mb-4">Loại file này không được hỗ trợ xem trước</p>
+                  <a
+                    href={`http://localhost:8080${selectedAttachment.fileUrl}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <Download className="w-4 h-4" />
+                    Tải xuống để xem
+                  </a>
+                </div>
+              )}
+            </div>
+            
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+              <button
+                onClick={() => setSelectedAttachment(null)}
+                className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Đóng
+              </button>
+              <a
+                href={`http://localhost:8080${selectedAttachment.fileUrl}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                Tải xuống
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
