@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { eventService, CreateEventResponse, GetCategoriesResponse, SubmitForApprovalResponse } from '@/service/organizer/event.service';
+import { adminEventService, AdminEventDetail } from '@/service/admin/event.service';
 import { CreateEventDto, Category, Event } from '@/types/event.types';
 
 export const useEvent = () => {
@@ -31,21 +32,22 @@ export const useEvent = () => {
     }
   }, []);
 
-  const createEvent = useCallback(async (eventData: CreateEventDto | FormData): Promise<Event | null> => {
+  const createEvent = useCallback(async (eventData: CreateEventDto | FormData): Promise<boolean> => {
     setLoading(true);
     setError(null);
     
     try {
       const response = await eventService.createEvent(eventData);
-      if (response.success && response.data?.event) {
-        return response.data.event;
+      
+      if (response.success) {
+        return true; // Return success boolean instead of event data
       }
       throw new Error(response.message || 'Không thể tạo sự kiện');
     } catch (err: any) {
       const errorMessage = err.message || 'Không thể tạo sự kiện';
       setError(errorMessage);
       toast.error(errorMessage);
-      return null;
+      return false;
     } finally {
       setLoading(false);
     }
@@ -57,8 +59,9 @@ export const useEvent = () => {
     
     try {
       const response = await eventService.updateEvent(eventId, eventData);
-      if (response.success && response.data?.event) {
-        return response.data.event;
+      
+      if (response.success && response.data) {
+        return response.data;
       }
       throw new Error(response.message || 'Không thể cập nhật sự kiện');
     } catch (err: any) {
@@ -71,18 +74,19 @@ export const useEvent = () => {
     }
   }, []);
 
-  const getEventById = useCallback(async (eventId: string): Promise<Event | null> => {
+  const getEventDetailForOrganizer = useCallback(async (slug: string): Promise<any> => {
     setLoading(true);
     setError(null);
     
     try {
-      const response = await eventService.getEventById(eventId);
-      if (response.success && response.data?.event) {
-        return response.data.event;
+      const response = await eventService.getEventDetailForOrganizer(slug);
+      
+      if (response.success && response.data) {
+        return response.data;
       }
-      throw new Error(response.message || 'Không thể lấy thông tin sự kiện');
+      throw new Error(response.message || 'Không thể lấy chi tiết sự kiện');
     } catch (err: any) {
-      const errorMessage = err.message || 'Không thể lấy thông tin sự kiện';
+      const errorMessage = err.message || 'Không thể lấy chi tiết sự kiện';
       setError(errorMessage);
       toast.error(errorMessage);
       return null;
@@ -97,8 +101,10 @@ export const useEvent = () => {
     
     try {
       const response = await eventService.submitForApproval(eventId);
-      if (response.success && response.data?.event) {
-        return response.data.event;
+      if (response.success && response.data) {
+        // For submitForApproval, response.data is { id, title, status }
+        // Return null since it's not a full Event object
+        return null;
       }
       throw new Error(response.message || 'Không thể gửi sự kiện để phê duyệt');
     } catch (err: any) {
@@ -138,6 +144,60 @@ export const useEvent = () => {
     }
   }, []);
 
+  // Admin methods
+  const getEventDetailForAdmin = useCallback(async (eventId: string): Promise<AdminEventDetail | null> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const eventDetail = await adminEventService.getEventById(eventId);
+      return eventDetail;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Không thể lấy chi tiết sự kiện';
+      setError(errorMessage);
+      toast.error(errorMessage);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const approveEvent = useCallback(async (eventId: string): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      await adminEventService.approveEvent(eventId);
+      toast.success('Phê duyệt sự kiện thành công');
+      return true;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Không thể phê duyệt sự kiện';
+      setError(errorMessage);
+      toast.error(errorMessage);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const rejectEvent = useCallback(async (eventId: string, reason?: string): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      await adminEventService.rejectEvent(eventId, reason);
+      toast.success('Từ chối sự kiện thành công');
+      return true;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Không thể từ chối sự kiện';
+      setError(errorMessage);
+      toast.error(errorMessage);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   return {
     loading,
     error,
@@ -145,8 +205,11 @@ export const useEvent = () => {
     getCategories,
     createEvent,
     updateEvent,
-    getEventById,
+    getEventDetailForOrganizer,
     submitForApproval,
     getMyEvents,
+    getEventDetailForAdmin,
+    approveEvent,
+    rejectEvent,
   };
 };

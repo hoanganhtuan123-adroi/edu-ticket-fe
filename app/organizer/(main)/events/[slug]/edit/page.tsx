@@ -4,14 +4,14 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import OrganizerHeader from '@/components/organizer/layout/OrganizerHeader';
-import TicketTypeManager from '@/components/organizer/events/TicketTypeManager';
+import TicketTypeManager from '@/components/organizer/events/create/TicketTypeManager';
 import { eventService } from '@/service/organizer/event.service';
 import { CreateEventDto, CreateTicketDto, Category, Event } from '@/types/event.types';
 
 export default function EditEventPage() {
   const router = useRouter();
   const params = useParams();
-  const eventId = params.id as string;
+  const slug = params.slug as string;
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -30,25 +30,28 @@ export default function EditEventPage() {
 
   useEffect(() => {
     fetchData();
-  }, [eventId]);
+  }, [slug]);
 
   const fetchData = async () => {
     try {
       // Fetch event details
-      const eventResponse = await eventService.getEventById(eventId);
-      if (eventResponse.success && eventResponse.data?.event) {
-        const eventData = eventResponse.data.event;
+      const eventResponse = await eventService.getEventDetailForOrganizer(slug);
+      if (eventResponse.success && eventResponse.data) {
+        const eventData = eventResponse.data;
         setEvent(eventData);
         
         // Set form data
         setFormData({
-          categoryId: eventData.categoryId,
+          categoryId: eventData.category?.id || 0,
           title: eventData.title,
           description: eventData.description || '',
-          location: eventData.location,
-          startTime: eventData.startTime,
-          endTime: eventData.endTime,
-          ticketTypes: eventData.ticketTypes || [],
+          location: eventData.location || '',
+          startTime: eventData.startTime || '',
+          endTime: eventData.endTime || '',
+          ticketTypes: eventData.ticketTypes?.map(ticket => ({
+            ...ticket,
+            price: parseFloat(ticket.price)
+          })) || [],
         });
       } else {
         throw new Error(eventResponse.message || 'Không thể tải thông tin sự kiện');
@@ -132,13 +135,13 @@ export default function EditEventPage() {
     setSaving(true);
     
     try {
-      const response = await eventService.updateEvent(eventId, formData);
+      const response = await eventService.updateEvent(event!.id, formData);
       
-      if (response.success && response.data?.event) {
+      if (response.success && response.data) {
         toast.success('Cập nhật sự kiện thành công! Đang chuyển hướng...');
         
         setTimeout(() => {
-          router.push(`/organizer/events/${eventId}/preview`);
+          router.push(`/organizer/events/${slug}/preview`);
         }, 1500);
       } else {
         throw new Error(response.message || 'Cập nhật sự kiện thất bại');
@@ -192,7 +195,7 @@ export default function EditEventPage() {
                 Chỉ các sự kiện ở trạng thái "Nháp" mới có thể được chỉnh sửa.
               </p>
               <button
-                onClick={() => router.push(`/organizer/events/${eventId}/preview`)}
+                onClick={() => router.push(`/organizer/events/${slug}/preview`)}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
               >
                 Xem sự kiện
@@ -326,7 +329,7 @@ export default function EditEventPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-end">
               <button
                 type="button"
-                onClick={() => router.push(`/organizer/events/${eventId}/preview`)}
+                onClick={() => router.push(`/organizer/events/${slug}/preview`)}
                 className="px-6 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
               >
                 Hủy

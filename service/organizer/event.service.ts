@@ -1,5 +1,5 @@
 import api from '@/service/axios.config';
-import { CreateEventDto, Event, Category } from '@/types/event.types';
+import { CreateEventDto, Event, Category, EventDetailResponse } from '@/types/event.types';
 
 // Helper function to get organizer token from cookies
 const getOrganizerToken = () => {
@@ -19,9 +19,7 @@ const getOrganizerToken = () => {
 export interface CreateEventResponse {
   success: boolean;
   message: string;
-  data?: {
-    event: Event;
-  };
+  data?: Event; // Direct Event object, not wrapped in "event"
 }
 
 export interface GetCategoriesResponse {
@@ -35,9 +33,12 @@ export interface GetCategoriesResponse {
 export interface SubmitForApprovalResponse {
   success: boolean;
   message: string;
-  data?: {
-    event: Event;
+  data?: { 
+    id: string; 
+    title: string; 
+    status: string; 
   };
+  timestamp?: string;
 }
 
 export const eventService = {
@@ -48,21 +49,23 @@ export const eventService = {
       const response = await api.get('/categories', {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
-      return response.data;
+      return response as unknown as GetCategoriesResponse; // Axios interceptor already returns response.data
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Không thể lấy danh sách danh mục');
     }
   },
 
   // Create new event (default status is DRAFT)
-  createEvent: async (eventData: CreateEventDto | FormData): Promise<CreateEventResponse> => {
+  createEvent: async (eventData: CreateEventDto | FormData): Promise<any> => {
     try {
       const token = getOrganizerToken();
       const response = await api.post('/events/create', eventData, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        // Don't set Content-Type for FormData - let browser set it with boundary
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data', // Đảm bảo có cái này hoặc để trống để tự nhận diện
+        },
       });
-      return response.data;
+      return response; // Axios interceptor already returns response.data
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Không thể tạo sự kiện');
     }
@@ -75,35 +78,48 @@ export const eventService = {
       const response = await api.put(`/events/${eventId}`, eventData, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
-      return response.data;
+      return response as unknown as CreateEventResponse; // Axios interceptor already returns response.data
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Không thể cập nhật sự kiện');
     }
   },
 
-  // Get event by ID
-  getEventById: async (eventId: string): Promise<CreateEventResponse> => {
+  // Get event detail for organizer
+  getEventDetailForOrganizer: async (slug: string): Promise<EventDetailResponse> => {
     try {
       const token = getOrganizerToken();
-      const response = await api.get(`/events/${eventId}`, {
+      const response = await api.get(`/events/organizer/${slug}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
-      return response.data;
+      return response as unknown as EventDetailResponse; // Axios interceptor already returns response.data
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Không thể lấy thông tin sự kiện');
+      throw new Error(error.response?.data?.message || 'Không thể lấy chi tiết sự kiện');
     }
   },
 
   // Submit event for approval
-  submitForApproval: async (eventId: string): Promise<SubmitForApprovalResponse> => {
+  submitForApproval: async (slug: string): Promise<SubmitForApprovalResponse> => {
     try {
       const token = getOrganizerToken();
-      const response = await api.post(`/events/${eventId}/submit-for-approval`, {}, {
+      const response = await api.patch(`/events/${slug}/submit-for-approval`, {}, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
-      return response.data;
+      return response as unknown as SubmitForApprovalResponse; // Axios interceptor already returns response.data
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Không thể gửi sự kiện để phê duyệt');
+    }
+  },
+
+  // Resubmit event for approval (for rejected events)
+  resubmitEventForApproval: async (slug: string): Promise<SubmitForApprovalResponse> => {
+    try {
+      const token = getOrganizerToken();
+      const response = await api.patch(`/events/${slug}/resubmit`, {}, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      return response as unknown as SubmitForApprovalResponse; // Axios interceptor already returns response.data
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Không thể gửi lại sự kiện để phê duyệt');
     }
   },
 
@@ -119,7 +135,7 @@ export const eventService = {
       if (filters?.status) params.append('status', filters.status);
       if (filters?.categoryId) params.append('categoryId', filters.categoryId.toString());
       
-      const response = await api.get(`/events/my-events?${params.toString()}`, {
+      const response = await api.get(`/events/organizer-events?${params.toString()}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       return response;

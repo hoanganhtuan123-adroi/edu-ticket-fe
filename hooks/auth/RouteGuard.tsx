@@ -54,9 +54,7 @@ export default function RouteGuard({ children, requiredRole, fallbackPath }: Rou
     switch (requiredRole) {
       case 'ADMIN':
         hasRequiredCookie = !!getAdminCookie();
-        console.log('RouteGuard ADMIN check - has cookie:', hasRequiredCookie);
         if (!hasRequiredCookie) {
-          console.log('RouteGuard redirecting to:', fallbackPath || '/admin/login');
           router.push(fallbackPath || '/admin/login');
         }
         break;

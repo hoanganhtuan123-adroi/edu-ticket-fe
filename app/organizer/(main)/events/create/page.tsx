@@ -14,12 +14,14 @@ import { CreateEventDto, CreateTicketDto } from '@/types/event.types';
 import EventFormHeader from '@/components/organizer/events/create/EventFormHeader';
 import BasicInfoForm from '@/components/organizer/events/create/BasicInfoForm';
 import BannerUpload from '@/components/organizer/events/create/BannerUpload';
+import AttachmentUpload from '@/components/organizer/events/create/AttachmentUpload';
 import FormActions from '@/components/organizer/events/create/FormActions';
 
 export default function CreateEventPage() {
   const router = useRouter();
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const [attachments, setAttachments] = useState<any[]>([]);
   
   // Use hooks
   const { createEvent, loading: eventLoading } = useEvent();
@@ -45,28 +47,29 @@ export default function CreateEventPage() {
 
   const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      // Check file size (10MB limit)
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error('Kích thước file không được vượt quá 10MB');
-        return;
-      }
+    
+    if (!file) return;
 
-      // Check file type
-      if (!file.type.match(/image\/(jpeg|jpg|png|gif|webp)$/)) {
-        toast.error('Chỉ chấp nhận file ảnh (jpg, png, gif, webp)');
-        return;
-      }
-
-      setBannerFile(file);
-      
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setBannerPreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+    // Validate file size (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Kích thước file không được vượt quá 10MB');
+      return;
     }
+
+    // Validate file type
+    if (!file.type.match(/image\/(jpeg|jpg|png|gif|webp)$/)) {
+      toast.error('Chỉ chấp nhận file ảnh (jpg, png, gif, webp)');
+      return;
+    }
+
+    setBannerFile(file);
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setBannerPreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleRemoveBanner = () => {
@@ -76,6 +79,10 @@ export default function CreateEventPage() {
 
   const handleTicketTypesChange = (ticketTypes: CreateTicketDto[]) => {
     setFormData(prev => ({ ...prev, ticketTypes }));
+  };
+
+  const handleAttachmentsChange = (newAttachments: any[]) => {
+    setAttachments(newAttachments);
   };
 
   const validateForm = (): string | null => {
@@ -143,39 +150,27 @@ export default function CreateEventPage() {
         submitData.append('description', formData.description);
       }
       submitData.append('location', formData.location);
-      submitData.append('startTime', formData.startTime);
-      submitData.append('endTime', formData.endTime);
       
-      // Don't send banner file - backend doesn't accept it
-      // if (bannerFile) {
-      //   submitData.append('banner', bannerFile);
-      // }
+      // Convert datetime-local to ISO8601 format
+      const startTimeISO = formData.startTime ? new Date(formData.startTime).toISOString() : '';
+      const endTimeISO = formData.endTime ? new Date(formData.endTime).toISOString() : '';
       
-      // Add ticket types as individual FormData entries
-      if (formData.ticketTypes && formData.ticketTypes.length > 0) {
-        formData.ticketTypes.forEach((ticket, index) => {
-          submitData.append(`ticketTypes[${index}].name`, ticket.name);
-          if (ticket.type) {
-            submitData.append(`ticketTypes[${index}].type`, ticket.type);
-          }
-          submitData.append(`ticketTypes[${index}].price`, ticket.price.toString());
-          submitData.append(`ticketTypes[${index}].quantityLimit`, ticket.quantityLimit.toString());
-          if (ticket.startSaleTime) {
-            submitData.append(`ticketTypes[${index}].startSaleTime`, ticket.startSaleTime);
-          }
-          if (ticket.endSaleTime) {
-            submitData.append(`ticketTypes[${index}].endSaleTime`, ticket.endSaleTime);
-          }
-          if (ticket.description) {
-            submitData.append(`ticketTypes[${index}].description`, ticket.description);
-          }
-        });
+      submitData.append('startTime', startTimeISO);
+      submitData.append('endTime', endTimeISO);
+      
+      // Add banner file if provided
+      if (bannerFile) {
+        submitData.append('banner', bannerFile);
       }
       
-      // Debug: Log FormData contents
-      console.log('FormData contents:');
-      for (let [key, value] of submitData.entries()) {
-        console.log(`${key}:`, value);
+      // Add attachment files if provided
+      attachments.forEach((attachment) => {
+        submitData.append('attachments', attachment.file);
+      });
+      
+      // Add ticket types as JSON string
+      if (formData.ticketTypes && formData.ticketTypes.length > 0) {
+        submitData.append('ticketTypes', JSON.stringify(formData.ticketTypes));
       }
       
       // Add settings if exists
@@ -186,13 +181,13 @@ export default function CreateEventPage() {
         );
       }
       
-      const event = await createEvent(submitData);
+      const success = await createEvent(submitData);
       
-      if (event) {
+      if (success) {
         toast.success('Tạo sự kiện thành công! Đang chuyển hướng...');
         
         setTimeout(() => {
-          router.push(`/organizer/events/${event.id}/preview`);
+          router.push('/organizer/events');
         }, 1500);
       }
     } catch (error: any) {
@@ -207,13 +202,13 @@ export default function CreateEventPage() {
     }
     
     try {
-      const event = await createEvent(formData);
+      const success = await createEvent(formData);
       
-      if (event) {
+      if (success) {
         toast.success('Lưu nháp thành công!');
         
         setTimeout(() => {
-          router.push(`/organizer/events/${event.id}/edit`);
+          router.push('/organizer/events');
         }, 1500);
       }
     } catch (error: any) {
@@ -258,6 +253,11 @@ export default function CreateEventPage() {
               bannerPreview={bannerPreview}
               onBannerChange={handleBannerChange}
               onRemoveBanner={handleRemoveBanner}
+            />
+            
+            <AttachmentUpload
+              attachments={attachments}
+              onAttachmentsChange={handleAttachmentsChange}
             />
             
             <TicketTypeManager

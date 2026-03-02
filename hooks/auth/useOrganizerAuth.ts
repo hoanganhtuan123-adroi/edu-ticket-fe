@@ -108,7 +108,6 @@ export const useOrganizerAuth = () => {
     try {
       // Step 1: Call POST /auth/login
       const loginResponse = await authService.login(credentials);
-      console.log(loginResponse)
       if (!loginResponse.success || !loginResponse.data?.accessToken) {
         setState(prev => ({
           ...prev,
@@ -122,7 +121,6 @@ export const useOrganizerAuth = () => {
 
       // Step 2: Immediately call GET /auth/verify
       const verifyResponse = await authService.verifyToken(token);
-      console.log(verifyResponse)
       if (!verifyResponse.success || !verifyResponse.data?.payload) {
         setState(prev => ({
           ...prev,

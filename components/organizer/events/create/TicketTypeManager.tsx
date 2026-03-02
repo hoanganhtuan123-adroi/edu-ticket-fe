@@ -14,6 +14,8 @@ export default function TicketTypeManager({ ticketTypes, onTicketTypesChange }: 
     type: TicketType.REGULAR,
     price: 0,
     quantityLimit: 100,
+    startSaleTime: '',
+    endSaleTime: '',
     description: '',
   });
 
@@ -39,6 +41,8 @@ export default function TicketTypeManager({ ticketTypes, onTicketTypesChange }: 
       type: TicketType.REGULAR,
       price: 0,
       quantityLimit: 100,
+      startSaleTime: '',
+      endSaleTime: '',
       description: '',
     });
   };
@@ -136,6 +140,32 @@ export default function TicketTypeManager({ ticketTypes, onTicketTypesChange }: 
                   </div>
                 </div>
                 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Thời gian bắt đầu bán
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={ticket.startSaleTime || ''}
+                      onChange={(e) => updateTicketType(index, 'startSaleTime', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Thời gian kết thúc bán
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={ticket.endSaleTime || ''}
+                      onChange={(e) => updateTicketType(index, 'endSaleTime', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+                
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Mô tả
@@ -222,6 +252,32 @@ export default function TicketTypeManager({ ticketTypes, onTicketTypesChange }: 
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="100"
                 min="1"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Thời gian bắt đầu bán
+              </label>
+              <input
+                type="datetime-local"
+                value={newTicket.startSaleTime || ''}
+                onChange={(e) => setNewTicket({ ...newTicket, startSaleTime: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Thời gian kết thúc bán
+              </label>
+              <input
+                type="datetime-local"
+                value={newTicket.endSaleTime || ''}
+                onChange={(e) => setNewTicket({ ...newTicket, endSaleTime: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>

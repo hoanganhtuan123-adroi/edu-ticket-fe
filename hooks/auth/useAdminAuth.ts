@@ -23,26 +23,16 @@ const setAdminCookie = (token: string) => {
     const expires = new Date();
     expires.setTime(expires.getTime() + (7 * 24 * 60 * 60 * 1000)); // 7 days
     const isSecure = window.location.protocol === 'https:';
-    console.log('Setting cookie with params:', {
-      token: token.substring(0, 20) + '...',
-      expires: expires.toUTCString(),
-      isSecure,
-      domain: window.location.hostname
-    });
     document.cookie = `USER_ADMIN=${token}; path=/; expires=${expires.toUTCString()}; SameSite=Lax${isSecure ? '; Secure' : ''}`;
-    console.log('Cookie set. Current cookies:', document.cookie);
   }
 };
 
 const getAdminCookie = (): string | null => {
   if (typeof window !== 'undefined') {
-    console.log('Getting admin cookie. All cookies:', document.cookie);
     const cookies = document.cookie.split(';');
     const adminCookie = cookies.find(cookie => cookie.trim().startsWith('USER_ADMIN='));
-    console.log('Found admin cookie:', adminCookie ? 'YES' : 'NO');
     if (adminCookie) {
       const token = adminCookie.split('=')[1];
-      console.log('Token length:', token.length);
       return token;
     }
   }
@@ -133,7 +123,9 @@ export const useAdminAuth = () => {
       // Step 2: Immediately call GET /auth/verify
       const verifyResponse = await authService.verifyToken(token);
 
-      if (!verifyResponse || !verifyResponse.payload) {
+      const payload = verifyResponse.payload || verifyResponse.data?.payload;
+
+      if (!payload) {
         setState(prev => ({
           ...prev,
           isLoading: false,
@@ -141,8 +133,6 @@ export const useAdminAuth = () => {
         }));
         return;
       }
-
-      const payload = verifyResponse.payload;
 
       // Step 3: Verify role is ADMIN
       if (payload.role !== 'ADMIN') {

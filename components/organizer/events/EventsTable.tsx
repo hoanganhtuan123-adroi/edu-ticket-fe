@@ -4,17 +4,18 @@ import { Event, EventStatus } from '@/types/event.types';
 
 interface EventsTableProps {
   events: Event[];
-  onPreview: (id: string) => void;
-  onEdit: (id: string) => void;
+  onPreview: (slug: string) => void;
+  onEdit: (slug: string) => void;
 }
 
 export default function EventsTable({ events, onPreview, onEdit }: EventsTableProps) {
-  const getStatusColor = (status: EventStatus) => {
+  const getStatusColor = (status?: EventStatus | string) => {
     switch (status) {
       case EventStatus.DRAFT:
         return 'bg-gray-100 text-gray-800';
       case EventStatus.PENDING_APPROVAL:
-        return 'bg-yellow-100 text-yellow-800';
+      case 'PENDING':
+        return 'bg-blue-100 text-blue-800';
       case EventStatus.APPROVED:
         return 'bg-green-100 text-green-800';
       case EventStatus.CANCELLED:
@@ -26,24 +27,26 @@ export default function EventsTable({ events, onPreview, onEdit }: EventsTablePr
     }
   };
 
-  const getStatusText = (status: EventStatus) => {
+  const getStatusText = (status?: EventStatus | string) => {
     switch (status) {
       case EventStatus.DRAFT:
         return 'Nháp';
       case EventStatus.PENDING_APPROVAL:
-        return 'Chờ duyệt';
+      case 'PENDING':
+        return 'Đang đợi phê duyệt';
       case EventStatus.APPROVED:
         return 'Đã duyệt';
       case EventStatus.CANCELLED:
-        return 'Đã hủy';
+        return 'Đã bị từ chối';
       case EventStatus.COMPLETED:
         return 'Đã kết thúc';
       default:
-        return status;
+        return status || '';
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('vi-VN', {
       day: '2-digit',
       month: '2-digit',
@@ -108,14 +111,14 @@ export default function EventsTable({ events, onPreview, onEdit }: EventsTablePr
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <div className="flex gap-2">
                     <button
-                      onClick={() => onPreview(event.id)}
+                      onClick={() => onPreview(event.slug || '')}
                       className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded"
                       title="Xem chi tiết"
                     >
                       <Eye className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => onEdit(event.id)}
+                      onClick={() => onEdit(event.slug || '')}
                       className="p-1 text-green-600 hover:text-green-800 hover:bg-green-50 rounded"
                       title="Chỉnh sửa"
                     >
