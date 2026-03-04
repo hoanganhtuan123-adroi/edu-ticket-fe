@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { useAdminNotifications } from "@/hooks/admin/useAdminNotifications";
+import { useAdminNotifications, Notification } from "@/hooks/admin/useAdminNotifications";
 import { Bell, Check, X, Info, AlertCircle, CheckCircle, AlertTriangle, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -48,8 +48,16 @@ export function NotificationBell() {
     }
   }, [isOpen, getNotifications]);
 
-  const handleMarkAsRead = useCallback(async (id: number) => {
-    await markAsRead(id);
+  const handleNotificationClick = useCallback(async (notification: Notification) => {
+    // Mark as read first
+    if (!notification.isRead) {
+      await markAsRead(notification.id);
+    }
+    
+    // Navigate if metadata contains URL
+    if (notification.metadata?.url) {
+      window.location.href = notification.metadata.url;
+    }
   }, [markAsRead]);
 
   const handleMarkAllAsRead = useCallback(async () => {
@@ -178,7 +186,7 @@ export function NotificationBell() {
                       className={`p-4 border-b border-gray-50/50 hover:bg-gray-50/50 transition-all duration-200 cursor-pointer ${
                         notification.isRead ? "opacity-70" : "bg-blue-50/20 border-l-2 border-l-blue-400"
                       }`}
-                      onClick={() => handleMarkAsRead(notification.id)}
+                      onClick={() => handleNotificationClick(notification)}
                       whileHover={{ x: 4 }}
                     >
                       <div className="flex items-start gap-3">
@@ -205,7 +213,8 @@ export function NotificationBell() {
                                   hour: '2-digit', 
                                   minute: '2-digit',
                                   day: '2-digit',
-                                  month: '2-digit'
+                                  month: '2-digit',
+                                  year: 'numeric'
                                 }
                               )}
                             </p>

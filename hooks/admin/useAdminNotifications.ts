@@ -8,11 +8,12 @@ export interface Notification {
   title: string;
   message: string;
   type: 'info' | 'success' | 'warning' | 'error';
-  target: 'user' | 'event' | 'global';
   isRead: boolean;
-  isSent: boolean;
-  createdAt: string;
-  updatedAt: string;
+  readAt?: Date;
+  isEmailSent: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  metadata?: any;
 }
 
 export const useAdminNotifications = () => {
@@ -130,13 +131,12 @@ export const useAdminNotifications = () => {
 
   // Send notification (admin only)
   const sendNotification = useCallback(async (data: {
-    target: 'user' | 'event' | 'global';
-    userId?: string;
-    eventId?: string;
     title: string;
     message: string;
     type: 'info' | 'success' | 'warning' | 'error';
-    saveToDb?: boolean;
+    sendWeb?: boolean;
+    sendEmail?: boolean;
+    metadata?: any;
   }) => {
     try {
       const notification = await adminNotificationService.sendNotification(data);

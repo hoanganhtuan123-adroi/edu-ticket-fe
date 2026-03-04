@@ -12,7 +12,8 @@ import {
   LogOut,
   Bell,
   X,
-  Tags
+  Tags,
+  HelpCircle
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -24,7 +25,8 @@ const menuItems = [
   { icon: Users, label: 'Quản lý người dùng', href: '/admin/users' },
   { icon: Shield, label: 'Quản lý vai trò', href: '/admin/roles' },
   { icon: Tags, label: 'Quản lý danh mục', href: '/admin/category' },
-  { icon: CalendarCheck, label: 'Kiểm duyệt sự kiện', href: '/admin/events', badge: '5' },
+  { icon: CalendarCheck, label: 'Kiểm duyệt sự kiện', href: '/admin/events' },
+  { icon: HelpCircle, label: 'Xử lý yêu cầu hỗ trợ', href: '/admin/support-requests' },
   { icon: BarChart3, label: 'Báo cáo thống kê', href: '/admin/reports' },
 ];
 
@@ -89,14 +91,9 @@ export default function AdminSidebar({ onClose }: AdminSidebarProps) {
                   }`}
                 >
                   <div className="flex items-center space-x-2 lg:space-x-3 min-w-0 flex-1">
-                    <item.icon className="w-4 h-4 lg:w-5 lg:h-5 flex-shrink-0" />
+                    <item.icon className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
                     <span className="text-xs lg:text-sm truncate">{item.label}</span>
                   </div>
-                  {item.badge && (
-                    <span className="bg-red-500 text-white text-xs px-1.5 lg:px-2 py-0.5 lg:py-1 rounded-full flex-shrink-0">
-                      {item.badge}
-                    </span>
-                  )}
                 </Link>
               </li>
             );
@@ -120,7 +117,7 @@ export default function AdminSidebar({ onClose }: AdminSidebarProps) {
                       : 'text-gray-300 hover:bg-gray-800 hover:text-white'
                   }`}
                 >
-                  <item.icon className="w-4 h-4 lg:w-5 lg:h-5 flex-shrink-0" />
+                  <item.icon className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
                   <span className="text-xs lg:text-sm truncate">{item.label}</span>
                 </Link>
               </li>

@@ -20,11 +20,12 @@ export interface Notification {
   title: string;
   message: string;
   type: 'info' | 'success' | 'warning' | 'error';
-  target: 'user' | 'event' | 'global';
   isRead: boolean;
-  isSent: boolean;
-  createdAt: string;
-  updatedAt: string;
+  readAt?: Date;
+  isEmailSent: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  metadata?: any;
 }
 
 export interface NotificationCount {
@@ -56,16 +57,34 @@ export const organizerNotificationService = {
   },
 
   // Get my notifications
-  getMyNotifications: async (): Promise<Notification[]> => {
+  getMyNotifications: async (filters?: {
+    limit?: number;
+    offset?: number;
+    isRead?: boolean;
+    type?: string;
+  }): Promise<Notification[]> => {
     try {
       const token = getOrganizerToken();
       if (!token) {
         console.warn('User not authenticated, cannot get notifications');
         return [];
       }
-      const response: any = await api.get('/notifications/my-notifications', {
+      
+      const params = new URLSearchParams();
+      
+      if (filters?.limit) params.append('limit', filters.limit.toString());
+      if (filters?.offset) params.append('offset', filters.offset.toString());
+      if (filters?.isRead !== undefined) params.append('isRead', filters.isRead.toString());
+      if (filters?.type) params.append('type', filters.type);
+      
+      const response: any = await api.get(`/notifications/my-notifications?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
+      // Handle paginated response
+      if (response.data?.data) {
+        return response.data.data;
+      }
       return response.data || [];
     } catch (error: any) {
       console.error('Failed to get notifications:', error);
@@ -119,18 +138,4 @@ export const organizerNotificationService = {
     }
   },
 
-  // Delete all notifications
-  clearAll: async (): Promise<void> => {
-    try {
-      const token = getOrganizerToken();
-      if (!token) {
-        throw new Error('User not authenticated');
-      }
-      await api.delete('/notifications/clear-all', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Không thể xóa tất cả thông báo');
-    }
-  },
 };

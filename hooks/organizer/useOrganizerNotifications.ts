@@ -3,6 +3,8 @@ import toast from 'react-hot-toast';
 import { organizerNotificationService, Notification } from '@/service/organizer/notification.service';
 import { useSocket } from '../useSocket';
 
+export type { Notification } from '@/service/organizer/notification.service';
+
 export const useOrganizerNotifications = () => {
   const { connected, onNotification, onUnreadCountUpdated } = useSocket();
   const [loading, setLoading] = useState(false);
@@ -111,7 +113,7 @@ export const useOrganizerNotifications = () => {
     }
   }, [notifications]);
 
-  // Delete all notifications
+  // Delete all notifications (using individual delete calls)
   const clearAll = useCallback(async () => {
     try {
       setLoading(true);

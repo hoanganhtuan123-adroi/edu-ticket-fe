@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useOrganizerNotifications } from "@/hooks/organizer/useOrganizerNotifications";
+import { useOrganizerNotifications, Notification } from "@/hooks/organizer/useOrganizerNotifications";
 import {
   Bell,
   Check,
@@ -57,12 +57,17 @@ export function OrganizerNotificationBell() {
     }
   }, [isOpen, getNotifications]);
 
-  const handleMarkAsRead = useCallback(
-    async (id: number) => {
-      await markAsRead(id);
-    },
-    [markAsRead],
-  );
+  const handleNotificationClick = useCallback(async (notification: Notification) => {
+    // Mark as read first
+    if (!notification.isRead) {
+      await markAsRead(notification.id);
+    }
+    
+    // Navigate if metadata contains URL
+    if (notification.metadata?.url) {
+      window.location.href = notification.metadata.url;
+    }
+  }, [markAsRead]);
 
   const handleMarkAllAsRead = useCallback(async () => {
     await markAllAsRead();
@@ -197,7 +202,7 @@ export function OrganizerNotificationBell() {
                           ? "opacity-70"
                           : "bg-blue-50/20 border-l-2 border-l-blue-400"
                       }`}
-                      onClick={() => handleMarkAsRead(notification.id)}
+                      onClick={() => handleNotificationClick(notification)}
                       whileHover={{ x: 4 }}
                     >
                       <div className="flex items-start gap-3">
@@ -225,6 +230,7 @@ export function OrganizerNotificationBell() {
                                   minute: "2-digit",
                                   day: "2-digit",
                                   month: "2-digit",
+                                  year: "numeric",
                                 },
                               )}
                             </p>

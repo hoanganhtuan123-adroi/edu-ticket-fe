@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Plus } from 'lucide-react';
 import { eventService } from '@/service/organizer/event.service';
 import { useCategory } from '@/hooks/useCategory';
 import { Event, EventStatus } from '@/types/event.types';
@@ -10,7 +10,6 @@ import { CategoryResponse } from '@/service/admin/category.service';
 import toast from 'react-hot-toast';
 
 // Import components
-import EventsHeader from '@/components/organizer/events/EventsHeader';
 import CategoriesSection from '@/components/organizer/events/CategoriesSection';
 import EventsTable from '@/components/organizer/events/EventsTable';
 import EmptyState from '@/components/organizer/events/EmptyState';
@@ -44,7 +43,7 @@ export default function EventsPage() {
     totalPages: 1
   });
 
-  // Get categories using the existing hook
+  // Get categories using existing hook
   const { categories, loading: categoriesLoading, error: categoriesError } = useCategory();
 
   const fetchEvents = async () => {
@@ -128,7 +127,20 @@ export default function EventsPage() {
     <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50">
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
-          <EventsHeader onCreateEvent={handleCreateEvent} />
+          {/* Page Header */}
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Quản lý sự kiện</h1>
+              <p className="text-gray-600">Quản lý các sự kiện của bạn</p>
+            </div>
+            <button
+              onClick={handleCreateEvent}
+              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-200 shadow-sm hover:shadow-md"
+            >
+              <Plus className="w-5 h-5" />
+              Tạo sự kiện mới
+            </button>
+          </div>
           
           <CategoriesSection
             categories={categories}

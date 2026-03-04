@@ -10,7 +10,6 @@ import { CreateEventDto, CreateTicketDto } from '@/types/event.types';
 
 
 // Import new components
-import EventFormHeader from '@/components/organizer/events/create/EventFormHeader';
 import BasicInfoForm from '@/components/organizer/events/create/BasicInfoForm';
 import BannerUpload from '@/components/organizer/events/create/BannerUpload';
 import AttachmentUpload from '@/components/organizer/events/create/AttachmentUpload';
@@ -231,10 +230,13 @@ export default function CreateEventPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="max-w-4xl mx-auto">
-          <EventFormHeader
-            title="Tạo sự kiện mới"
-            description="Điền thông tin chi tiết để tạo sự kiện mới. Sự kiện sẽ được lưu dưới dạng nháp và bạn có thể gửi phê duyệt sau."
-          />
+          {/* Page Header */}
+          <div className="mb-6 lg:mb-8">
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Tạo sự kiện mới</h1>
+            <p className="text-gray-600 mt-1 text-sm lg:text-base">
+              Điền thông tin chi tiết để tạo sự kiện mới. Sự kiện sẽ được lưu dưới dạng nháp và bạn có thể gửi phê duyệt sau.
+            </p>
+          </div>
           
           <form onSubmit={handleSubmit} className="space-y-8">
             <BasicInfoForm

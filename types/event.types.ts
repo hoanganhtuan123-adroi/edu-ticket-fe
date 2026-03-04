@@ -60,6 +60,7 @@ export interface Event {
   startTime?: string;
   endTime?: string;
   status?: EventStatus;
+  isVisible?: boolean;
   organizerId?: string;
   bannerUrl?: string;
   ticketTypes?: TicketTypeData[];

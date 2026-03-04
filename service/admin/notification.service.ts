@@ -20,11 +20,12 @@ export interface Notification {
   title: string;
   message: string;
   type: 'info' | 'success' | 'warning' | 'error';
-  target: 'user' | 'event' | 'global';
   isRead: boolean;
-  isSent: boolean;
-  createdAt: string;
-  updatedAt: string;
+  readAt?: Date;
+  isEmailSent: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  metadata?: any;
 }
 
 export interface NotificationCount {
@@ -47,12 +48,29 @@ export const adminNotificationService = {
   },
 
   // Get my notifications
-  getMyNotifications: async (): Promise<Notification[]> => {
+  getMyNotifications: async (filters?: {
+    limit?: number;
+    offset?: number;
+    isRead?: boolean;
+    type?: string;
+  }): Promise<Notification[]> => {
     try {
       const token = getAdminToken();
-      const response: any = await api.get('/notifications/my-notifications', {
+      const params = new URLSearchParams();
+      
+      if (filters?.limit) params.append('limit', filters.limit.toString());
+      if (filters?.offset) params.append('offset', filters.offset.toString());
+      if (filters?.isRead !== undefined) params.append('isRead', filters.isRead.toString());
+      if (filters?.type) params.append('type', filters.type);
+      
+      const response: any = await api.get(`/notifications/my-notifications?${params.toString()}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
+      
+      // Handle paginated response
+      if (response.data?.data) {
+        return response.data.data;
+      }
       return response.data || [];
     } catch (error: any) {
       console.error('Failed to get notifications:', error);
@@ -99,13 +117,12 @@ export const adminNotificationService = {
 
   // Send notification (for admin only)
   sendNotification: async (data: {
-    target: 'user' | 'event' | 'global';
-    userId?: string;
-    eventId?: string;
     title: string;
     message: string;
     type: 'info' | 'success' | 'warning' | 'error';
-    saveToDb?: boolean;
+    sendWeb?: boolean;
+    sendEmail?: boolean;
+    metadata?: any;
   }): Promise<Notification> => {
     try {
       const token = getAdminToken();

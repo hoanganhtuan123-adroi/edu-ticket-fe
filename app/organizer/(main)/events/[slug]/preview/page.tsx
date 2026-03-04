@@ -3,10 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import toast from 'react-hot-toast';
-import OrganizerHeader from '@/components/organizer/layout/OrganizerHeader';
 import { eventService } from '@/service/organizer/event.service';
 import { Event, TicketType, EventDetailResponse } from '@/types/event.types';
-import EventPreviewHeader from '@/components/organizer/events/detail/EventPreviewHeader';
 import EventStatusBadge from '@/components/organizer/events/detail/EventStatusBadge';
 import EventBanner from '@/components/organizer/events/detail/EventBanner';
 import EventInfo from '@/components/organizer/events/detail/EventInfo';
@@ -108,6 +106,26 @@ export default function EventPreviewPage() {
     }
   };
 
+  const handleToggleVisibility = async () => {
+    if (!event || !event.slug) return;
+    
+    try {
+      const response = await eventService.toggleEventVisibility(event.slug);
+      if (response.success && response.data) {
+        // Update local event state
+        setEvent({
+          ...event,
+          isVisible: response.data.isVisible
+        });
+        toast.success(response.data.isVisible ? 'Hiển thị sự kiện thành công!' : 'Ẩn sự kiện thành công!');
+      } else {
+        throw new Error(response.message || 'Thay đổi trạng thái hiển thị thất bại');
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Thay đổi trạng thái hiển thị thất bại');
+    }
+  };
+
   const handleEdit = () => {
     router.push(`/organizer/events/${slug}/edit`);
   };
@@ -115,7 +133,6 @@ export default function EventPreviewPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <OrganizerHeader />
         <div className="p-8">
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -128,7 +145,6 @@ export default function EventPreviewPage() {
   if (!event) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <OrganizerHeader />
         <div className="p-8">
           <div className="text-center">
             <p className="text-gray-500">Không tìm thấy sự kiện</p>
@@ -139,12 +155,16 @@ export default function EventPreviewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-      <OrganizerHeader />
-      
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50">
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="max-w-6xl mx-auto">
-          <EventPreviewHeader event={event} />
+          {/* Page Header */}
+          <div className="mb-6 lg:mb-8">
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Xem trước sự kiện</h1>
+            <p className="text-gray-600 mt-1 text-sm lg:text-base">
+              Kiểm tra lại thông tin sự kiện trước khi gửi phê duyệt
+            </p>
+          </div>
           
           {/* Event Status Badge */}
           <div className="mb-6">
@@ -325,6 +345,7 @@ export default function EventPreviewPage() {
             onEdit={handleEdit}
             onSubmitForApproval={handleSubmitForApproval}
             onResubmitForApproval={handleResubmitForApproval}
+            onToggleVisibility={handleToggleVisibility}
             submitting={submitting}
             resubmitting={resubmitting}
           />

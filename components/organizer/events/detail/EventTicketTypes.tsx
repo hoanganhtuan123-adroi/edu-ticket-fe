@@ -37,36 +37,6 @@ export default function EventTicketTypes({ event }: EventTicketTypesProps) {
     }).format(amount);
   };
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      DRAFT: {
-        bg: 'bg-yellow-100',
-        text: 'text-yellow-800',
-        border: 'border-yellow-200',
-        label: 'Nháp'
-      },
-      ACTIVE: {
-        bg: 'bg-green-100',
-        text: 'text-green-800',
-        border: 'border-green-200',
-        label: 'Đang bán'
-      },
-      SOLD_OUT: {
-        bg: 'bg-red-100',
-        text: 'text-red-800',
-        border: 'border-red-200',
-        label: 'Hết vé'
-      }
-    };
-
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.DRAFT;
-    
-    return (
-      <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium border ${config.bg} ${config.text} ${config.border}`}>
-        {config.label}
-      </span>
-    );
-  };
 
   if (!event.ticketTypes || event.ticketTypes.length === 0) {
     return (
@@ -121,9 +91,6 @@ export default function EventTicketTypes({ event }: EventTicketTypesProps) {
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Thời gian bán
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Trạng thái
                   </th>
                 </tr>
               </thead>
@@ -188,9 +155,6 @@ export default function EventTicketTypes({ event }: EventTicketTypesProps) {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      {getStatusBadge(ticket.status)}
-                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -217,7 +181,6 @@ export default function EventTicketTypes({ event }: EventTicketTypesProps) {
                   </span>
                 </div>
               </div>
-              {getStatusBadge(ticket.status)}
             </div>
             
             {ticket.description && (

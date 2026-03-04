@@ -143,4 +143,17 @@ export const eventService = {
       throw new Error(error.response?.data?.message || 'Không thể lấy danh sách sự kiện');
     }
   },
+
+  // Toggle event visibility
+  toggleEventVisibility: async (slug: string): Promise<any> => {
+    try {
+      const token = getOrganizerToken();
+      const response = await api.patch(`/events/${slug}/toggle-visibility`, {}, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      return response;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Không thể thay đổi trạng thái hiển thị sự kiện');
+    }
+  },
 };
