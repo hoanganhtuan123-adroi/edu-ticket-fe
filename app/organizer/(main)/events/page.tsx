@@ -10,7 +10,6 @@ import { CategoryResponse } from '@/service/admin/category.service';
 import toast from 'react-hot-toast';
 
 // Import components
-import OrganizerHeader from '@/components/organizer/layout/OrganizerHeader';
 import EventsHeader from '@/components/organizer/events/EventsHeader';
 import CategoriesSection from '@/components/organizer/events/CategoriesSection';
 import EventsTable from '@/components/organizer/events/EventsTable';
@@ -114,8 +113,7 @@ export default function EventsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-        <OrganizerHeader />
+      <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50">
         <div className="flex justify-center items-center min-h-[calc(100vh-80px)]">
           <div className="text-center">
             <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
@@ -127,9 +125,7 @@ export default function EventsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-      <OrganizerHeader />
-      
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50">
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
           <EventsHeader onCreateEvent={handleCreateEvent} />

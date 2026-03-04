@@ -10,12 +10,14 @@ import {
   XCircle,
   ArrowLeft,
   Lock,
-  Unlock
+  Unlock,
+  Trash
 } from 'lucide-react';
 import { UserDetailResponse } from '@/service/admin/user.service';
 import { userService } from '@/service/admin/user.service';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
 
 interface UserDetailProps {
   user: UserDetailResponse;
@@ -26,6 +28,8 @@ interface UserDetailProps {
 export default function UserDetail({ user, onBack, onUserUpdate }: UserDetailProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [currentUser, setCurrentUser] = useState(user);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('vi-VN', {
@@ -38,15 +42,13 @@ export default function UserDetail({ user, onBack, onUserUpdate }: UserDetailPro
   };
 
   const handleLockUnlockUser = async () => {
-    const confirmMessage = currentUser.isActive 
-      ? 'Bạn có chắc chắn muốn khóa tài khoản này?' 
-      : 'Bạn có chắc chắn muốn mở khóa tài khoản này?';
-    
-    if (!confirm(confirmMessage)) {
-      return;
-    }
+    setShowConfirmDialog(true);
+  };
 
+  const confirmLockUnlock = async () => {
+    setShowConfirmDialog(false);
     setIsUpdating(true);
+    
     try {
       const response = await userService.lockUnlockUser(currentUser.id, !currentUser.isActive);
       if (response.success) {
@@ -62,6 +64,46 @@ export default function UserDetail({ user, onBack, onUserUpdate }: UserDetailPro
     } finally {
       setIsUpdating(false);
     }
+  };
+
+  const cancelLockUnlock = () => {
+    setShowConfirmDialog(false);
+  };
+
+  const handleDeleteUser = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    setShowDeleteDialog(false);
+    setIsUpdating(true);
+    
+    try {
+      const response = await userService.deleteUser(currentUser.id);
+      if (response.success) {
+        toast.success(response.message || 'Xóa tài khoản thành công');
+        onBack(); // Go back to user list after successful deletion
+      } else {
+        throw new Error(response.message || 'Xóa tài khoản thất bại');
+      }
+    } catch (error: any) {
+      let errorMessage = 'Xóa tài khoản thất bại';
+      
+      // Check for foreign key constraint violation
+      if (error.message && error.message.includes('foreign key constraint')) {
+        errorMessage = 'Đã có lỗi xảy ra, không thể xóa tài khoản';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      toast.error(errorMessage);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const cancelDeleteUser = () => {
+    setShowDeleteDialog(false);
   };
 
   const getRoleBadge = (role: string) => {
@@ -131,7 +173,7 @@ export default function UserDetail({ user, onBack, onUserUpdate }: UserDetailPro
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 bg-linear-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
                 <User className="w-8 h-8 text-white" />
               </div>
               <div>
@@ -144,30 +186,45 @@ export default function UserDetail({ user, onBack, onUserUpdate }: UserDetailPro
               </div>
             </div>
             
-            {/* Lock/Unlock Button */}
-            <button
-              onClick={handleLockUnlockUser}
-              disabled={isUpdating}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                currentUser.isActive
-                  ? 'bg-red-600 hover:bg-red-700 text-white'
-                  : 'bg-green-600 hover:bg-green-700 text-white'
-              } ${isUpdating ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {isUpdating ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-              ) : currentUser.isActive ? (
-                <>
-                  <Lock className="w-4 h-4" />
-                  Khóa tài khoản
-                </>
-              ) : (
-                <>
-                  <Unlock className="w-4 h-4" />
-                  Mở khóa tài khoản
-                </>
+            {/* Action Buttons */}
+            <div className="flex gap-2">
+              {/* Lock/Unlock Button */}
+              <button
+                onClick={handleLockUnlockUser}
+                disabled={isUpdating}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                  currentUser.isActive
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                    : 'bg-green-600 hover:bg-green-700 text-white'
+                } ${isUpdating ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {isUpdating ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                ) : currentUser.isActive ? (
+                  <>
+                    <Lock className="w-4 h-4" />
+                    Khóa tài khoản
+                  </>
+                ) : (
+                  <>
+                    <Unlock className="w-4 h-4" />
+                    Mở khóa tài khoản
+                  </>
+                )}
+              </button>
+
+              {/* Delete Button - Only show for locked accounts */}
+              {!currentUser.isActive && (
+                <button
+                  onClick={handleDeleteUser}
+                  disabled={isUpdating}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors bg-gray-600 hover:bg-gray-700 text-white ${isUpdating ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <Trash className="w-4 h-4" />
+                  Xóa tài khoản
+                </button>
               )}
-            </button>
+            </div>
           </div>
         </div>
       </div>
@@ -300,6 +357,33 @@ export default function UserDetail({ user, onBack, onUserUpdate }: UserDetailPro
           </div>
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        title={currentUser.isActive ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
+        message={currentUser.isActive 
+          ? 'Bạn có chắc chắn muốn khóa tài khoản này? Người dùng sẽ không thể đăng nhập vào hệ thống.' 
+          : 'Bạn có chắc chắn muốn mở khóa tài khoản này? Người dùng sẽ có thể đăng nhập vào hệ thống lại.'
+        }
+        confirmText={currentUser.isActive ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
+        cancelText="Hủy"
+        type={currentUser.isActive ? 'danger' : 'warning'}
+        onConfirm={confirmLockUnlock}
+        onCancel={cancelLockUnlock}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        title="Xóa tài khoản"
+        message={`Bạn có chắc chắn muốn xóa tài khoản của "${currentUser.fullName}"? Hành động này không thể hoàn tác và tất cả dữ liệu liên quan sẽ bị mất.`}
+        confirmText="Xóa tài khoản"
+        cancelText="Hủy"
+        type="danger"
+        onConfirm={confirmDeleteUser}
+        onCancel={cancelDeleteUser}
+      />
     </div>
   );
 }

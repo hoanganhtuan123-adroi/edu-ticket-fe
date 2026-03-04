@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from 'react';
-import { Menu, X, Bell, LogOut } from 'lucide-react';
+import { Menu, X, LogOut } from 'lucide-react';
+import { OrganizerNotificationBell } from '../notification/NotificationBell';
 
 export default function OrganizerHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -40,10 +41,7 @@ export default function OrganizerHeader() {
           {/* Right side items */}
           <div className="flex items-center space-x-4">
             {/* Notifications */}
-            <button className="relative p-2 text-gray-600 hover:text-green-600 transition-colors">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
+            <OrganizerNotificationBell />
 
             {/* User menu */}
             <div className="flex items-center space-x-3">
@@ -81,7 +79,7 @@ export default function OrganizerHeader() {
             <a href="/organizer/analytics" className="block px-3 py-2 text-gray-600 hover:text-green-600 font-medium transition-colors">
               Thống kê
             </a>
-            <a href="/organizer/logout" className="block px-3 py-2 text-red-600 hover:text-red-700 font-medium transition-colors flex items-center">
+            <a href="/organizer/logout" className="px-3 py-2 text-red-600 hover:text-red-700 font-medium transition-colors flex items-center">
               <LogOut className="w-4 h-4 mr-2" />
               Đăng xuất
             </a>

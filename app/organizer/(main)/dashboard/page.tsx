@@ -1,4 +1,3 @@
-import OrganizerHeader from '@/components/organizer/layout/OrganizerHeader';
 import DashboardStats from '@/components/organizer/dashboard/DashboardStats';
 import RecentEvents from '@/components/organizer/dashboard/RecentEvents';
 import EventStatistics from '@/components/organizer/dashboard/EventStatistics';
@@ -6,8 +5,6 @@ import EventStatistics from '@/components/organizer/dashboard/EventStatistics';
 export default function OrganizerDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
-      <OrganizerHeader />
-      
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="mb-6 lg:mb-8">
           <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Dashboard</h1>

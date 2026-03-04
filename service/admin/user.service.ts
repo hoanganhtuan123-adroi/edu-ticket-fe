@@ -170,10 +170,10 @@ export const userService = {
   },
 
   // Lock/Unlock user
-  lockUnlockUser: async (id: string, isActive: boolean): Promise<ApiResponse<object>> => {
+  lockUnlockUser: async (id: string, isActive: boolean): Promise<ApiResponse<null>> => {
     try {
       const token = getAdminToken();
-      const response: ApiResponse<object> = await api.patch(`/users/${id}/lock`, { isActive }, {
+      const response: ApiResponse<null> = await api.patch(`/users/${id}/lock`, { isActive }, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       return response;
