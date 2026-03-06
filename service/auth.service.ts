@@ -12,6 +12,7 @@ export interface LoginResponse {
   data?: {
     accessToken: string;
   };
+  timestamp?: string;
 }
 
 export interface VerifyTokenResponse {

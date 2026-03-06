@@ -4,9 +4,9 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Plus } from 'lucide-react';
 import { eventService } from '@/service/organizer/event.service';
-import { useCategory } from '@/hooks/useCategory';
+import { useOrganizerCategories } from '@/hooks/organizer/useOrganizerCategories';
 import { Event, EventStatus } from '@/types/event.types';
-import { CategoryResponse } from '@/service/admin/category.service';
+import { CategoryResponse } from '@/service/organizer/category.service';
 import toast from 'react-hot-toast';
 
 // Import components
@@ -43,8 +43,8 @@ export default function EventsPage() {
     totalPages: 1
   });
 
-  // Get categories using existing hook
-  const { categories, loading: categoriesLoading, error: categoriesError } = useCategory();
+  // Get categories using organizer hook
+  const { categories, isLoading: categoriesLoading, error: categoriesError, getCategories } = useOrganizerCategories();
 
   const fetchEvents = async () => {
     try {
@@ -78,6 +78,11 @@ export default function EventsPage() {
   useEffect(() => {
     fetchEvents();
   }, [pagination.offset, selectedCategory]);
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    getCategories();
+  }, [getCategories]);
 
   const handleCategorySelect = (categoryId: number | null) => {
     setSelectedCategory(categoryId);

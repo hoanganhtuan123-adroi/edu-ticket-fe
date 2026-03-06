@@ -166,9 +166,13 @@ export default function CreateEventPage() {
         submitData.append('attachments', attachment.file);
       });
       
-      // Add ticket types as JSON string
+      // Add ticket types as JSON string (ensure no id fields are included)
       if (formData.ticketTypes && formData.ticketTypes.length > 0) {
-        submitData.append('ticketTypes', JSON.stringify(formData.ticketTypes));
+        const cleanedTicketTypes = formData.ticketTypes.map((ticket: any) => {
+          const { id, ...cleanedTicket } = ticket;
+          return cleanedTicket;
+        });
+        submitData.append('ticketTypes', JSON.stringify(cleanedTicketTypes));
       }
       
       // Add settings if exists
@@ -200,7 +204,16 @@ export default function CreateEventPage() {
     }
     
     try {
-      const success = await createEvent(formData);
+      // Ensure no id fields are included in ticket types
+      const cleanedFormData = {
+        ...formData,
+        ticketTypes: formData.ticketTypes?.map((ticket: any) => {
+          const { id, ...cleanedTicket } = ticket;
+          return cleanedTicket;
+        }) || []
+      };
+      
+      const success = await createEvent(cleanedFormData);
       
       if (success) {
         toast.success('Lưu nháp thành công!');

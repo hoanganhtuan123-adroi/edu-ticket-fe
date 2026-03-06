@@ -26,7 +26,7 @@ const menuItems = [
   { icon: Shield, label: 'Quản lý vai trò', href: '/admin/roles' },
   { icon: Tags, label: 'Quản lý danh mục', href: '/admin/category' },
   { icon: CalendarCheck, label: 'Kiểm duyệt sự kiện', href: '/admin/events' },
-  { icon: HelpCircle, label: 'Xử lý yêu cầu hỗ trợ', href: '/admin/support-requests' },
+  { icon: HelpCircle, label: 'Xử lý yêu cầu hỗ trợ', href: '/admin/support' },
   { icon: BarChart3, label: 'Báo cáo thống kê', href: '/admin/reports' },
 ];
 

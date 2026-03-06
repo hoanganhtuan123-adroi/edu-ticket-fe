@@ -22,8 +22,13 @@ const setOrganizerCookie = (token: string) => {
   if (typeof window !== 'undefined') {
     const expires = new Date();
     expires.setTime(expires.getTime() + (7 * 24 * 60 * 60 * 1000)); // 7 days
-    const isSecure = window.location.protocol === 'https:';
-    document.cookie = `USER_ORGANIZER=${token}; path=/; expires=${expires.toUTCString()}; SameSite=Strict${isSecure ? '; Secure' : ''}`;
+    
+    try {
+      // Set cookie only
+      document.cookie = `USER_ORGANIZER=${token}; path=/; expires=${expires.toUTCString()}`;
+    } catch (error) {
+      console.error("Cookie setting error:", error);
+    }
   }
 };
 
@@ -40,6 +45,7 @@ const getOrganizerCookie = (): string | null => {
 
 const clearOrganizerCookie = () => {
   if (typeof window !== 'undefined') {
+    // Clear cookie only
     document.cookie = `USER_ORGANIZER=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
   }
 };
@@ -68,8 +74,8 @@ export const useOrganizerAuth = () => {
 
     // Verify token with backend
     authService.verifyToken(token).then(response => {
-      if (response.success && response.data?.payload?.role === 'ORGANIZER') {
-        const payload = response.data.payload;
+      const payload = response.data?.payload || response.payload;
+      if (payload && payload.role === 'ORGANIZER') {
         setState(prev => ({
           ...prev,
           isAuthenticated: true,
@@ -121,16 +127,16 @@ export const useOrganizerAuth = () => {
 
       // Step 2: Immediately call GET /auth/verify
       const verifyResponse = await authService.verifyToken(token);
-      if (!verifyResponse.success || !verifyResponse.data?.payload) {
+      const payload = verifyResponse.data?.payload || verifyResponse.payload;
+      
+      if (!payload) {
         setState(prev => ({
           ...prev,
           isLoading: false,
-          error: verifyResponse.message || 'Token verification failed',
+          error: 'Token verification failed',
         }));
         return;
       }
-
-      const payload = verifyResponse.data.payload;
 
       // Step 3: Verify role is ORGANIZER
       if (payload.role !== 'ORGANIZER') {
@@ -159,10 +165,12 @@ export const useOrganizerAuth = () => {
         error: null,
       }));
 
-      toast.success('Organizer login successful!');
+      toast.success('đăng nhập thành công');
       
-      // Step 6: Redirect to organizer dashboard
-      router.push('/organizer/dashboard');
+      // Step 6: Redirect to organizer dashboard with small delay
+      setTimeout(() => {
+        router.push('/organizer/dashboard');
+      }, 100);
 
     } catch (error: any) {
       setState(prev => ({
