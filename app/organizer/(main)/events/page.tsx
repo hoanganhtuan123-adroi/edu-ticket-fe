@@ -117,11 +117,11 @@ export default function EventsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50">
-        <div className="flex justify-center items-center min-h-[calc(100vh-80px)]">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+        <div className="flex justify-center items-center min-h-[calc(100vh-80px)] px-4">
           <div className="text-center">
-            <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-            <p className="text-gray-600 font-medium">Đang tải danh sách sự kiện...</p>
+            <Loader2 className="w-12 h-12 lg:w-16 lg:h-16 animate-spin text-blue-600 mx-auto mb-4" />
+            <p className="text-gray-600 font-medium text-sm lg:text-base">Đang tải danh sách sự kiện...</p>
           </div>
         </div>
       </div>
@@ -129,21 +129,21 @@ export default function EventsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50">
-      <div className="p-4 sm:p-6 lg:p-8">
-        <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+      <div className="p-3 sm:p-4 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
           {/* Page Header */}
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4 sm:mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Quản lý sự kiện</h1>
-              <p className="text-gray-600">Quản lý các sự kiện của bạn</p>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Quản lý sự kiện</h1>
+              <p className="text-gray-600 text-sm sm:text-base">Quản lý các sự kiện của bạn</p>
             </div>
             <button
               onClick={handleCreateEvent}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-200 shadow-sm hover:shadow-md"
+              className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-md w-full sm:w-auto"
             >
-              <Plus className="w-5 h-5" />
-              Tạo sự kiện mới
+              <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="text-sm sm:text-base font-medium">Tạo sự kiện mới</span>
             </button>
           </div>
           
@@ -156,12 +156,12 @@ export default function EventsPage() {
           />
 
           {(!events || events.length === 0) ? (
-            <div className="flex justify-center py-12">
+            <div className="flex justify-center py-8 sm:py-12">
               <EmptyState onCreateEvent={handleCreateEvent} />
             </div>
           ) : (
-            <div className="space-y-6">
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <div className="space-y-4 sm:space-y-6">
+              <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
                 <EventsTable
                   events={events || []}
                   onPreview={handlePreviewEvent}
@@ -170,7 +170,7 @@ export default function EventsPage() {
               </div>
               
               {pagination.totalPages > 1 && (
-                <div className="flex justify-center">
+                <div className="flex justify-center px-2 sm:px-0">
                   <EventsPagination
                     currentPage={pagination.currentPage}
                     totalPages={pagination.totalPages}
