@@ -13,7 +13,7 @@ interface UseSocketReturn {
   onUnreadCountUpdated: (callback: (data: { count: number }) => void) => () => void;
 }
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
 
 export const useSocket = (): UseSocketReturn => {
   const socketRef = useRef<{ emit: (event: string, data: unknown) => void } | null>(null);
@@ -24,7 +24,33 @@ export const useSocket = (): UseSocketReturn => {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const token = localStorage.getItem('token');
+    // Helper function to get token from cookie based on user type
+    const getTokenFromCookie = (): string | null => {
+      const cookies = document.cookie.split(";");
+      
+      // Check current page to determine user type
+      const isAdminPage = window.location.pathname.startsWith('/admin');
+      const isOrganizerPage = window.location.pathname.startsWith('/organizer');
+      
+      if (isAdminPage) {
+        // Admin page - get admin token
+        const adminCookie = cookies.find((cookie) =>
+          cookie.trim().startsWith("USER_ADMIN=")
+        );
+        return adminCookie ? adminCookie.split("=")[1] : null;
+      } else if (isOrganizerPage) {
+        // Organizer page - get organizer token
+        const organizerCookie = cookies.find((cookie) =>
+          cookie.trim().startsWith("USER_ORGANIZER=")
+        );
+        return organizerCookie ? organizerCookie.split("=")[1] : null;
+      } else {
+        // Default: no token for other pages
+        return null;
+      }
+    };
+
+    const token = getTokenFromCookie();
     const io = require('socket.io-client').io;
     
     const socket = io(SOCKET_URL, {

@@ -57,9 +57,16 @@ export default function SupportRequestDetails({
 
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-3">Trạng thái</h3>
-        <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-lg ${getStatusColor(request.status)}`}>
-          {getStatusIcon(request.status)}
-          <span className="font-medium">{getStatusText(request.status)}</span>
+        <div className="space-y-3">
+          <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-lg ${getStatusColor(request.status)}`}>
+            {getStatusIcon(request.status)}
+            <span className="font-medium">{getStatusText(request.status)}</span>
+          </div>
+          {request.lastRepliedBy && (
+            <div className="text-sm text-gray-600">
+              <span className="font-medium">Phản hồi cuối:</span> {request.lastRepliedBy}
+            </div>
+          )}
         </div>
       </div>
     </div>

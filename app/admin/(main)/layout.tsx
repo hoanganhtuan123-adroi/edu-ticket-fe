@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import AdminSidebar from '@/components/admin/layout/AdminSidebar';
+import AdminHeader from '@/components/admin/layout/AdminHeader';
 import RouteGuard from '@/hooks/auth/RouteGuard';
 
 export default function MainLayout({
@@ -45,6 +46,7 @@ export default function MainLayout({
 
         {/* Main content with proper margin for sidebar */}
         <main className="lg:ml-64 min-h-screen">
+          <AdminHeader />
           {children}
         </main>
       </div>

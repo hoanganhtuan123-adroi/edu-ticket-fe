@@ -4,9 +4,6 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 // Response interceptor - return full response for consistent API responses
@@ -15,7 +12,6 @@ api.interceptors.response.use(
     return response.data;
   },
   (error) => {
-    // Don't handle 401 redirects here - let individual services handle token management
     return Promise.reject(error);
   }
 );

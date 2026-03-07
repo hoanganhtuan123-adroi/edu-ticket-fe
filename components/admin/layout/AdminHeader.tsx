@@ -2,7 +2,7 @@
 
 import { LogOut, User } from 'lucide-react';
 import { useAdminAuth } from '@/hooks/auth/useAdminAuth';
-import { NotificationBell } from '@/components/admin/notification/NotificationBell';
+import { NotificationBell } from '@/components/admin/notifications/NotificationBell';
 
 export default function AdminHeader() {
   const { user, logout } = useAdminAuth();

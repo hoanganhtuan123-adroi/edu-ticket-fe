@@ -28,6 +28,17 @@ export interface Notification {
   metadata?: any;
 }
 
+export interface PaginatedNotifications {
+  data: Notification[];
+  pagination: {
+    limit: number;
+    offset: number;
+    total: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}
+
 export interface NotificationCount {
   count: number;
 }
@@ -53,7 +64,7 @@ export const adminNotificationService = {
     offset?: number;
     isRead?: boolean;
     type?: string;
-  }): Promise<Notification[]> => {
+  }): Promise<PaginatedNotifications> => {
     try {
       const token = getAdminToken();
       const params = new URLSearchParams();
@@ -68,13 +79,39 @@ export const adminNotificationService = {
       });
       
       // Handle paginated response
-      if (response.data?.data) {
-        return response.data.data;
+      if (response.data?.data && response.data?.pagination) {
+        return response.data;
       }
-      return response.data || [];
+      
+      // Fallback: create pagination structure from array response
+      const data = response.data || [];
+      const itemsPerPage = filters?.limit || 10;
+      const totalItems = data.length;
+      const totalPages = Math.ceil(totalItems / itemsPerPage);
+      const currentPage = Math.floor((filters?.offset || 0) / itemsPerPage) + 1;
+      
+      return {
+        data,
+        pagination: {
+          limit: itemsPerPage,
+          offset: filters?.offset || 0,
+          total: totalItems,
+          hasNext: currentPage < totalPages,
+          hasPrev: currentPage > 1,
+        },
+      };
     } catch (error: any) {
       console.error('Failed to get notifications:', error);
-      return [];
+      return {
+        data: [],
+        pagination: {
+          limit: 10,
+          offset: 0,
+          total: 0,
+          hasNext: false,
+          hasPrev: false,
+        },
+      };
     }
   },
 

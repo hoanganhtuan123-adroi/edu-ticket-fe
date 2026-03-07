@@ -1,7 +1,7 @@
 "use client";
 
-import { FileText, Calendar, User, Copy } from 'lucide-react';
-import { SupportRequestDetailResponseDto } from '@/types/support.types';
+import { FileText, Calendar, User, Copy } from "lucide-react";
+import { SupportRequestDetailResponseDto } from "@/types/support.types";
 
 interface SupportRequestHeaderProps {
   request: SupportRequestDetailResponseDto;
@@ -27,8 +27,12 @@ export default function SupportRequestHeader({
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center space-x-3 mb-2">
-            <h1 className="text-2xl font-bold text-gray-900">{request.title}</h1>
-            <span className={`px-3 py-1 text-sm font-medium rounded-full flex items-center space-x-2 ${getStatusColor(request.status)}`}>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {request.title}
+            </h1>
+            <span
+              className={`px-3 py-1 text-sm font-medium rounded-full flex items-center space-x-2 ${getStatusColor(request.status)}`}
+            >
               {getStatusIcon(request.status)}
               <span>{getStatusText(request.status)}</span>
             </span>
@@ -36,7 +40,9 @@ export default function SupportRequestHeader({
           <div className="flex items-center space-x-6 text-sm text-gray-600">
             <div className="flex items-center space-x-2">
               <FileText className="w-4 h-4" />
-              <span className="font-mono font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded">{request.ticketCode}</span>
+              <span className="font-mono font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                {request.ticketCode}
+              </span>
               <button
                 onClick={() => onCopyTicketCode(request.ticketCode)}
                 className="p-1 hover:bg-gray-100 rounded transition-colors group relative"
@@ -54,12 +60,11 @@ export default function SupportRequestHeader({
               <Calendar className="w-4 h-4" />
               <span>{formatDate(request.createdAt)}</span>
             </div>
-            {request.lastRepliedBy && (
-              <div className="flex items-center space-x-2">
-                <User className="w-4 h-4" />
-                <span>Phản hồi cuối: {request.lastRepliedBy}</span>
-              </div>
-            )}
+
+            <div className="flex items-center space-x-2">
+              <User className="w-4 h-4" />
+              <span>Phản hồi cuối: {request.lastRepliedBy}</span>
+            </div>
           </div>
         </div>
       </div>

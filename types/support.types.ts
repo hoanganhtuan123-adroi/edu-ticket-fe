@@ -34,13 +34,12 @@ export interface SupportRequestDetailResponseDto {
   ticketCode: string;
   title: string;
   description: string;
-  requesterId: string;
   status: string;
   lastRepliedBy: string | null;
   closedAt: string | null;
   messages: any[];
   attachments: SupportAttachmentDto[];
-  requester: SupportRequesterDto;
+  requester?: SupportRequesterDto;
 }
 
 export interface SupportAttachmentDto {

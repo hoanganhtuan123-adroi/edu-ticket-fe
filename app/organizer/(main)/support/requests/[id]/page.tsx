@@ -9,9 +9,9 @@ import { useOrganizerSupport } from '@/hooks/organizer/useOrganizerSupport';
 import { SupportRequestDetailResponseDto } from '@/types/support.types';
 import SupportRequestHeader from '@/components/organizer/support/SupportRequestHeader';
 import SupportRequestDescription from '@/components/organizer/support/SupportRequestDescription';
-import SupportRequesterInfo from '@/components/organizer/support/SupportRequesterInfo';
 import SupportRequestAttachments from '@/components/organizer/support/SupportRequestAttachments';
 import SupportRequestDetails from '@/components/organizer/support/SupportRequestDetails';
+import SupportRequestMessages from '@/components/organizer/support/SupportRequestMessages';
 
 export default function SupportRequestDetailPage() {
   const router = useRouter();
@@ -213,9 +213,6 @@ export default function SupportRequestDetailPage() {
             {/* Description */}
             <SupportRequestDescription request={request} />
 
-            {/* Requester Information */}
-            <SupportRequesterInfo request={request} />
-
             {/* Attachments */}
             <SupportRequestAttachments
               request={request}
@@ -232,6 +229,12 @@ export default function SupportRequestDetailPage() {
               getStatusColor={getStatusColor}
               getStatusIcon={getStatusIcon}
               getStatusText={getStatusText}
+              formatDate={formatDate}
+            />
+
+            {/* Messages */}
+            <SupportRequestMessages
+              request={request}
               formatDate={formatDate}
             />
           </div>

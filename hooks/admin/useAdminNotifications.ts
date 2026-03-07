@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
-import { adminNotificationService } from '@/service/admin/notification.service';
+import { adminNotificationService, PaginatedNotifications } from '@/service/admin/notification.service';
 import { useSocket } from '../useSocket';
 
 export interface Notification {
@@ -22,6 +22,12 @@ export const useAdminNotifications = () => {
   const [error, setError] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10,
+  });
   
   // Use ref to store callbacks to avoid stale closure issues
   const callbacksRef = useRef({
@@ -34,21 +40,41 @@ export const useAdminNotifications = () => {
   }, []);
 
   // Fetch all notifications
-  const getNotifications = useCallback(async () => {
+  const getNotifications = useCallback(async (page: number = 1) => {
     setLoading(true);
     setError(null);
     
     try {
-      const data = await adminNotificationService.getMyNotifications();
-      setNotifications(data);
+      const offset = (page - 1) * pagination.itemsPerPage;
+      // Always call API with limit and offset
+      const response: PaginatedNotifications = await adminNotificationService.getMyNotifications({
+        limit: pagination.itemsPerPage,
+        offset,
+      });
+      setNotifications(response.data);
+      
+      // Calculate pagination values from API response
+      const totalPages = Math.ceil(response.pagination.total / response.pagination.limit);
+      setPagination(prev => ({
+        ...prev,
+        currentPage: page,
+        totalPages: Math.max(1, totalPages),
+        totalItems: response.pagination.total,
+      }));
     } catch (err: any) {
       const errorMessage = err.message || 'Không thể lấy danh sách thông báo';
       setError(errorMessage);
       console.error(errorMessage);
+      // Set default pagination on error
+      setPagination(prev => ({
+        ...prev,
+        currentPage: page,
+        totalPages: Math.max(1, prev.totalPages),
+      }));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [pagination.itemsPerPage]);
 
   // Fetch unread count
   const getUnreadCount = useCallback(async () => {
@@ -166,16 +192,18 @@ export const useAdminNotifications = () => {
 
   // Listen to socket for new notifications - stable subscription
   useEffect(() => {
+    console.log('🔔 Setting up notification listeners, connected:', connected);
     if (!connected) return;
 
     const unsubscribeNotification = onNotification((data: unknown) => {
-      console.log('� Socket notification received:', data);
+      console.log('🔔 Socket notification received:', data);
       const notificationData = data as Notification;
       
       // Add new notification to list
       setNotifications((prev) => [notificationData, ...prev]);
       
-      // Note: unread count will be updated via unreadCountUpdated event from server
+      // Also increment unread count immediately for better UX
+      setUnreadCount((prev) => prev + 1);
     });
 
     return () => {
@@ -183,9 +211,14 @@ export const useAdminNotifications = () => {
     };
   }, [connected, onNotification]);
 
+  // Handle page change
+  const handlePageChange = useCallback(async (page: number) => {
+    await getNotifications(page);
+  }, [getNotifications]);
+
   // Initial fetch
   useEffect(() => {
-    getNotifications();
+    getNotifications(1);
     getUnreadCount();
   }, [getNotifications, getUnreadCount]);
 
@@ -195,8 +228,10 @@ export const useAdminNotifications = () => {
     clearError,
     notifications,
     unreadCount,
+    pagination,
     getNotifications,
     getUnreadCount,
+    handlePageChange,
     markAsRead,
     markAllAsRead,
     deleteNotification,

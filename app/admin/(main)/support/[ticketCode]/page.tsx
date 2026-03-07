@@ -1,59 +1,89 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { motion } from 'motion/react';
-import { useAdminSupport } from '@/hooks/admin/useAdminSupport';
-import { SupportRequestDetailResponseDto } from '@/types/support.types';
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { motion } from "motion/react";
+import toast from "react-hot-toast";
+import { useAdminSupport } from "@/hooks/admin/useAdminSupport";
+import { SupportRequestDetailResponseDto } from "@/types/support.types";
 
 // Import components
-import { SupportDetailHeader } from '@/components/admin/support/detail/SupportDetailHeader';
-import { RequestInfoCard } from '@/components/admin/support/detail/RequestInfoCard';
-import { AttachmentsCard } from '@/components/admin/support/detail/AttachmentsCard';
-import { MessagesCard } from '@/components/admin/support/detail/MessagesCard';
-import { RequesterInfoCard } from '@/components/admin/support/detail/RequesterInfoCard';
-import { ActionsCard } from '@/components/admin/support/detail/ActionsCard';
+import { SupportDetailHeader } from "@/components/admin/support/detail/SupportDetailHeader";
+import { RequestInfoCard } from "@/components/admin/support/detail/RequestInfoCard";
+import { AttachmentsCard } from "@/components/admin/support/detail/AttachmentsCard";
+import { MessagesCard } from "@/components/admin/support/detail/MessagesCard";
+import { RequesterInfoCard } from "@/components/admin/support/detail/RequesterInfoCard";
+import { ActionsCard } from "@/components/admin/support/detail/ActionsCard";
 
 export default function SupportRequestDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { getSupportRequestById } = useAdminSupport();
-  
-  const [request, setRequest] = useState<SupportRequestDetailResponseDto | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const {
+    getSupportRequestById,
+    closeSupportRequest,
+    updateSupportStatus,
+    isLoading,
+  } = useAdminSupport();
+
+  const [request, setRequest] =
+    useState<SupportRequestDetailResponseDto | null>(null);
+  const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const ticketCode = params.ticketCode as string;
 
+  const handleUpdateStatus = async (ticketCode: string, status: string) => {
+    try {
+      const result = await updateSupportStatus(ticketCode, status as any);
+      if (result) {
+        // Refresh page data after status update
+        window.location.reload();
+      }
+    } catch (error: any) {
+      // Error is already handled by the hook with toast
+      console.error("Update status failed:", error);
+    }
+  };
+
+  const handleCloseRequest = async (ticketCode: string) => {
+    try {
+      const result = await closeSupportRequest(ticketCode);
+      if (result) {
+        toast.success("Yêu cầu hỗ trợ đã được đóng thành công!");
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
+      }
+    } catch (error: any) {
+      // Error is already handled by the hook with toast
+      console.error("Close request failed:", error);
+    }
+  };
+
   useEffect(() => {
     const loadRequest = async () => {
       if (!ticketCode) {
-        console.log('No ticketCode provided');
         return;
       }
-      
-      console.log('Loading request for ticketCode:', ticketCode);
-      setIsLoading(true);
       try {
         const data = await getSupportRequestById(ticketCode);
-        console.log('Received data:', data);
         if (data) {
           setRequest(data);
         } else {
-          setError('Không tìm thấy yêu cầu hỗ trợ');
+          setError("Không tìm thấy yêu cầu hỗ trợ");
         }
       } catch (err: any) {
-        console.error('Error loading request:', err);
-        setError(err.message || 'Không thể tải thông tin yêu cầu');
+        console.error("Error loading request:", err);
+        setError(err.message || "Không thể tải thông tin yêu cầu");
       } finally {
-        setIsLoading(false);
+        setPageLoading(false);
       }
     };
 
     loadRequest();
   }, [ticketCode]);
 
-  if (isLoading) {
+  if (pageLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -69,7 +99,7 @@ export default function SupportRequestDetailPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error || 'Không tìm thấy yêu cầu hỗ trợ'}
+            {error || "Không tìm thấy yêu cầu hỗ trợ"}
           </div>
           <button
             onClick={() => router.back()}
@@ -111,7 +141,14 @@ export default function SupportRequestDetailPage() {
             <RequesterInfoCard requester={request.requester} />
 
             {/* Actions Card */}
-            <ActionsCard onBack={() => router.back()} />
+            <ActionsCard
+              onBack={() => router.back()}
+              ticketCode={ticketCode}
+              currentStatus={request.status}
+              onCloseRequest={handleCloseRequest}
+              handleUpdateStatus={handleUpdateStatus}
+              isLoading={isLoading}
+            />
           </div>
         </div>
       </div>
