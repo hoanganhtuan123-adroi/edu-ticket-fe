@@ -164,7 +164,7 @@ export const useUserAuth = () => {
       toast.success('User login successful!');
       
       // Step 6: Redirect to dashboard
-      router.push('/dashboard');
+      router.push('/client/dashboard');
 
     } catch (error: any) {
       setState(prev => ({

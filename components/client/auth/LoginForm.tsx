@@ -18,17 +18,17 @@ export default function LoginForm() {
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
           <motion.div 
-            className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-linear-to-br from-blue-500 to-purple-600 rounded-xl sm:rounded-2xl mb-3 sm:mb-4 shadow-lg"
+            className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-linear-to-br from-purple-500 to-indigo-600 rounded-xl sm:rounded-2xl mb-3 sm:mb-4 shadow-lg"
             whileHover={{ scale: 1.05, rotate: 5 }}
             transition={{ duration: 0.2 }}
           >
             <i className="fas fa-user text-white text-lg sm:text-2xl"></i>
           </motion.div>
           <h3 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
-            Đăng nhập tài khoản
+            Đăng nhập tài khoản của bạn
           </h3>
           <p className="text-gray-600 text-sm sm:text-base px-2">
-            Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục
+            Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục khám phá sự kiện.
           </p>
         </motion.div>
 

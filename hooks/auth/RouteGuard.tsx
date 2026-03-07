@@ -26,6 +26,17 @@ const getOrganizerCookie = (): string | null => {
   return null;
 };
 
+const getUserClientCookie = (): string | null => {
+  if (typeof window !== 'undefined') {
+    const cookies = document.cookie.split(';');
+    const userClientCookie = cookies.find(cookie => cookie.trim().startsWith('USER_CLIENT='));
+    if (userClientCookie) {
+      return userClientCookie.split('=')[1];
+    }
+  }
+  return null;
+};
+
 const getUserCookie = (): string | null => {
   if (typeof window !== 'undefined') {
     const cookies = document.cookie.split(';');
@@ -39,7 +50,7 @@ const getUserCookie = (): string | null => {
 
 interface RouteGuardProps {
   children: React.ReactNode;
-  requiredRole: 'ADMIN' | 'ORGANIZER' | 'USER';
+  requiredRole: 'ADMIN' | 'ORGANIZER' | 'USER' | 'USER_CLIENT';
   fallbackPath?: string;
 }
 
@@ -62,6 +73,12 @@ export default function RouteGuard({ children, requiredRole, fallbackPath }: Rou
         hasRequiredCookie = !!getOrganizerCookie();
         if (!hasRequiredCookie) {
           router.push(fallbackPath || '/organizer/login');
+        }
+        break;
+      case 'USER_CLIENT':
+        hasRequiredCookie = !!getUserCookie();
+        if (!hasRequiredCookie) {
+          router.push(fallbackPath || '/client/login');
         }
         break;
       case 'USER':
