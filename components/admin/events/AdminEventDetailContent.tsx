@@ -2,15 +2,14 @@ import {
   Calendar, 
   MapPin, 
   Clock, 
-  Users, 
   Tag, 
-  Ticket, 
   User,
   CheckCircle,
   XCircle,
   Download,
   FileText,
-  X
+  X,
+  Target
 } from 'lucide-react';
 import { AdminEventDetail } from '@/service/admin/event.service';
 import { useState } from 'react';
@@ -218,6 +217,89 @@ export default function AdminEventDetailContent({ event, onApprove, onReject }: 
                 </div>
               </div>
             </div>
+
+            {/* Additional Info from Settings */}
+            {event.settings && (
+              <div className="space-y-6">
+                {/* Speakers Section */}
+                {event.settings.speakers && event.settings.speakers.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <User className="w-5 h-5 text-blue-600" />
+                      Diễn giả ({event.settings.speakers.length})
+                    </h3>
+                    <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+                      {event.settings.speakers.map((speaker: any, index: number) => (
+                        <div key={index} className="flex gap-4 p-4 bg-white rounded-lg border border-gray-200">
+                          {/* Speaker Avatar */}
+                          <div className="shrink-0">
+                            {speaker.avatar ? (
+                              <img
+                                src={speaker.avatar}
+                                alt={speaker.name}
+                                className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm"
+                                onError={(e) => {
+                                  e.currentTarget.src = '/placeholder-avatar.jpg';
+                                }}
+                              />
+                            ) : (
+                              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold text-lg shadow-sm">
+                                {speaker.name?.charAt(0)?.toUpperCase() || 'D'}
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Speaker Info */}
+                          <div className="flex-1">
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-gray-600">Diễn giả:</span>
+                                <h4 className="font-semibold text-gray-900 text-lg">
+                                  {speaker.name}
+                                </h4>
+                              </div>
+                              {speaker.title && (
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-gray-600">Chức vụ:</span>
+                                  <p className="text-sm text-purple-600 font-medium">
+                                    {speaker.title}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                            {speaker.bio && (
+                              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 mt-3">
+                                <p className="text-sm text-gray-700 leading-relaxed">
+                                  <span className="font-medium text-gray-600">Tiểu sử: </span>
+                                  {speaker.bio}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Target Audience Section */}
+                {event.settings.targetAudience && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <Target className="w-5 h-5 text-green-600" />
+                      Đối tượng tham gia
+                    </h3>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                        <p className="text-gray-700 leading-relaxed">
+                          {event.settings.targetAudience}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Ticket Types */}
             {event.ticketTypes && event.ticketTypes.length > 0 && (

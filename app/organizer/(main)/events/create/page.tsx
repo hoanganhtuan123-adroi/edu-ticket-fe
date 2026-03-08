@@ -4,26 +4,32 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import TicketTypeManager from '@/components/organizer/events/create/TicketTypeManager';
-import { useEvent } from '@/hooks/useEvent';
-import { useCategory } from '@/hooks/useCategory';
+import { useOrganizerEvents } from '@/hooks/organizer/useOrganizerEvents';
+import { useCategories } from '@/hooks/organizer/useCategories';
 import { CreateEventDto, CreateTicketDto } from '@/types/event.types';
-
 
 // Import new components
 import BasicInfoForm from '@/components/organizer/events/create/BasicInfoForm';
 import BannerUpload from '@/components/organizer/events/create/BannerUpload';
 import AttachmentUpload from '@/components/organizer/events/create/AttachmentUpload';
 import FormActions from '@/components/organizer/events/create/FormActions';
+import AdditionalInfoForm, { AdditionalInfo } from '@/components/organizer/events/create/AdditionalInfoForm';
 
 export default function CreateEventPage() {
   const router = useRouter();
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
   const [attachments, setAttachments] = useState<any[]>([]);
+  const [showAdditionalInfo, setShowAdditionalInfo] = useState(false);
+  const [speakerAvatarFiles, setSpeakerAvatarFiles] = useState<{ [key: number]: File }>({});
+  const [additionalInfo, setAdditionalInfo] = useState<AdditionalInfo>({
+    speakers: [{ name: '', title: '', bio: '' }],
+    targetAudience: ''
+  });
   
   // Use hooks
-  const { createEvent, loading: eventLoading } = useEvent();
-  const { categories, loading: loadingCategories, error: categoriesError } = useCategory();
+  const { createEvent, isLoading: eventLoading } = useOrganizerEvents();
+  const { categories, loading: loadingCategories, error: categoriesError } = useCategories();
   
   const [formData, setFormData] = useState<CreateEventDto>({
     categoryId: 0,
@@ -81,6 +87,18 @@ export default function CreateEventPage() {
 
   const handleAttachmentsChange = (newAttachments: any[]) => {
     setAttachments(newAttachments);
+  };
+
+  const handleSpeakerAvatarChange = (speakerIndex: number, file: File | null) => {
+    setSpeakerAvatarFiles(prev => {
+      const newFiles = { ...prev };
+      if (file) {
+        newFiles[speakerIndex] = file;
+      } else {
+        delete newFiles[speakerIndex];
+      }
+      return newFiles;
+    });
   };
 
   const validateForm = (): string | null => {
@@ -166,6 +184,12 @@ export default function CreateEventPage() {
         submitData.append('attachments', attachment.file);
       });
       
+      // Add speaker avatar files if provided
+      Object.entries(speakerAvatarFiles).forEach(([speakerIndex, file]) => {
+        submitData.append(`speakerAvatars`, file);
+        submitData.append(`speakerAvatarIndex`, speakerIndex);
+      });
+      
       // Add ticket types as JSON string (ensure no id fields are included)
       if (formData.ticketTypes && formData.ticketTypes.length > 0) {
         const cleanedTicketTypes = formData.ticketTypes.map((ticket: any) => {
@@ -175,12 +199,21 @@ export default function CreateEventPage() {
         submitData.append('ticketTypes', JSON.stringify(cleanedTicketTypes));
       }
       
-      // Add settings if exists
-      if (formData.settings) {
-        submitData.append('settings', typeof formData.settings === 'string' 
-          ? formData.settings 
-          : JSON.stringify(formData.settings)
-        );
+      // Add settings only if additional info section is shown and has data
+      if (showAdditionalInfo) {
+        const settings = {
+          ...additionalInfo,
+          // Filter out empty values to keep settings clean
+          speakers: additionalInfo.speakers.filter(s => s.name.trim()),
+          targetAudience: additionalInfo.targetAudience?.trim() || undefined
+        };
+        
+        // Only add settings if there's actual data
+        const hasData = settings.speakers.length > 0 || settings.targetAudience;
+        
+        if (hasData) {
+          submitData.append('settings', JSON.stringify(settings));
+        }
       }
       
       const success = await createEvent(submitData);
@@ -265,6 +298,35 @@ export default function CreateEventPage() {
               onBannerChange={handleBannerChange}
               onRemoveBanner={handleRemoveBanner}
             />
+            
+            {/* Optional Additional Info Section */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Thông tin bổ sung (Không bắt buộc)</h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Thêm thông tin diễn giả, điều kiện tham gia, tài liệu cần chuẩn bị...
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAdditionalInfo(!showAdditionalInfo)}
+                  className="flex items-center px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                >
+                  {showAdditionalInfo ? 'Ẩn' : 'Hiện'}
+                </button>
+              </div>
+              
+              {showAdditionalInfo && (
+                <div className="mt-6">
+                  <AdditionalInfoForm
+                    data={additionalInfo}
+                    onChange={setAdditionalInfo}
+                    onSpeakerAvatarChange={handleSpeakerAvatarChange}
+                  />
+                </div>
+              )}
+            </div>
             
             <AttachmentUpload
               attachments={attachments}

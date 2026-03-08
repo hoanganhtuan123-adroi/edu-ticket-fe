@@ -204,6 +204,96 @@ export default function EventPreviewPage() {
                     </h3>
                     <EventInfo event={event} />
                   </div>
+
+                  {/* Additional Info from Settings */}
+                  {event.settings && (
+                    <div className="space-y-6">
+                      {/* Speakers Section */}
+                      {(event.settings as any).speakers && (event.settings as any).speakers.length > 0 && (
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                            <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            Diễn giả
+                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-600 border border-blue-100">
+                              {(event.settings as any).speakers.length} diễn giả
+                            </span>
+                          </h3>
+                          <div className="space-y-4">
+                            {(event.settings as any).speakers.map((speaker: any, index: number) => (
+                              <div key={index} className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+                                <div className="flex gap-4">
+                                  {/* Speaker Avatar */}
+                                  <div className="shrink-0">
+                                    {speaker.avatar ? (
+                                      <img
+                                        src={speaker.avatar}
+                                        alt={speaker.name}
+                                        className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm"
+                                        onError={(e) => {
+                                          e.currentTarget.src = '/placeholder-avatar.jpg';
+                                        }}
+                                      />
+                                    ) : (
+                                      <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold text-lg shadow-sm">
+                                        {speaker.name?.charAt(0)?.toUpperCase() || 'D'}
+                                      </div>
+                                    )}
+                                  </div>
+                                  
+                                  {/* Speaker Info */}
+                                  <div className="flex-1">
+                                    <div className="space-y-2">
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-medium text-gray-600">Diễn giả:</span>
+                                        <h4 className="font-semibold text-gray-900 text-lg">
+                                          {speaker.name}
+                                        </h4>
+                                      </div>
+                                      {speaker.title && (
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-medium text-gray-600">Chức vụ:</span>
+                                          <p className="text-sm text-purple-600 font-medium">
+                                            {speaker.title}
+                                          </p>
+                                        </div>
+                                      )}
+                                    </div>
+                                    {speaker.bio && (
+                                      <div className="bg-white rounded-lg p-3 border border-blue-200 mt-3">
+                                        <p className="text-sm text-gray-700 leading-relaxed">
+                                          <span className="font-medium text-gray-600">Tiểu sử: </span>
+                                          {speaker.bio}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Target Audience Section */}
+                      {(event.settings as any).targetAudience && (
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            Đối tượng tham gia
+                          </h3>
+                          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100">
+                            <p className="text-gray-700 leading-relaxed">
+                              {(event.settings as any).targetAudience}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   
                   {/* Ticket Types */}
                   <EventTicketTypes event={event} />

@@ -13,6 +13,8 @@ import {
   BarChart,
   CheckCircle,
   XCircle,
+  User,
+  Target,
 } from "lucide-react";
 
 interface EventDetailProps {
@@ -224,6 +226,98 @@ export default function EventDetail({ eventData }: EventDetailProps) {
                 </div>
               </div>
             </div>
+
+            {/* Additional Info from Settings */}
+            {eventData.settings && (
+              <div className="space-y-4">
+                {/* Speakers Section */}
+                {eventData.settings.speakers && eventData.settings.speakers.length > 0 && (
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="p-2 bg-blue-50 rounded-lg">
+                        <User className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Diễn giả
+                      </h3>
+                      <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-600 border border-blue-100">
+                        {eventData.settings.speakers.length} diễn giả
+                      </span>
+                    </div>
+                    <div className="space-y-4">
+                      {eventData.settings.speakers.map((speaker: any, index: number) => (
+                        <div key={index} className="flex gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                          {/* Speaker Avatar */}
+                          <div className="shrink-0">
+                            {speaker.avatar ? (
+                              <img
+                                src={speaker.avatar}
+                                alt={speaker.name}
+                                className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm"
+                                onError={(e) => {
+                                  e.currentTarget.src = '/placeholder-avatar.jpg';
+                                }}
+                              />
+                            ) : (
+                              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold text-lg shadow-sm">
+                                {speaker.name?.charAt(0)?.toUpperCase() || 'D'}
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Speaker Info */}
+                          <div className="flex-1">
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-gray-600">Diễn giả:</span>
+                                <h4 className="font-semibold text-gray-900 text-lg">
+                                  {speaker.name}
+                                </h4>
+                              </div>
+                              {speaker.title && (
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-gray-600">Chức vụ:</span>
+                                  <p className="text-sm text-purple-600 font-medium">
+                                    {speaker.title}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                            {speaker.bio && (
+                              <div className="bg-white rounded-lg p-3 border border-gray-200 mt-3">
+                                <p className="text-sm text-gray-700 leading-relaxed">
+                                  <span className="font-medium text-gray-600">Tiểu sử: </span>
+                                  {speaker.bio}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Target Audience Section */}
+                {eventData.settings.targetAudience && (
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-green-50 rounded-lg">
+                        <Target className="w-5 h-5 text-green-600" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Đối tượng tham gia
+                      </h3>
+                    </div>
+                    <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                      <p className="text-gray-700 leading-relaxed">
+                        {eventData.settings.targetAudience}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Ticket Types */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">

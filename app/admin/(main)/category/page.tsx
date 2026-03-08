@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useCategory } from "@/hooks/useCategory";
+import { useCategory } from "@/hooks/admin/useCategory";
 import {
   Category,
   CreateCategoryRequest,
