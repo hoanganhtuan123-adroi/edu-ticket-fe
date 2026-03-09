@@ -75,6 +75,15 @@ export const useEvents = (options: UseEventsOptions = {}) => {
     }
   };
 
+  const goToPage = (page: number) => {
+    const limit = options.limit || 6;
+    const offset = (page - 1) * limit;
+    fetchEvents({
+      ...options,
+      offset,
+    });
+  };
+
   const loadMore = () => {
     if (pagination.hasNext) {
       fetchEvents({
@@ -95,6 +104,7 @@ export const useEvents = (options: UseEventsOptions = {}) => {
     pagination,
     loadMore,
     fetchEvents,
+    goToPage,
   };
 };
 

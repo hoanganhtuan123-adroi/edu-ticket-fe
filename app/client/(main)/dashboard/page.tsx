@@ -15,7 +15,7 @@ const DashboardPage = () => {
     endDate: "",
   });
 
-  const { events, loading, error, pagination, loadMore } = useEvents({
+  const { events, loading, error, pagination, goToPage } = useEvents({
     limit: 6,
     offset: 0,
     categorySlug: filters.categorySlug || undefined,
@@ -59,8 +59,8 @@ const DashboardPage = () => {
         <FeaturedEvents
           events={transformedEvents}
           loading={loading}
-          onLoadMore={loadMore}
-          hasNext={pagination.hasNext}
+          pagination={pagination}
+          onPageChange={goToPage}
         />
       </main>
 
