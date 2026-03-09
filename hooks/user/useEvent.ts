@@ -34,8 +34,9 @@ export interface UseEventsOptions {
   limit?: number;
   offset?: number;
   title?: string;
-  status?: string;
   categorySlug?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export const useEvents = (options: UseEventsOptions = {}) => {
@@ -85,7 +86,7 @@ export const useEvents = (options: UseEventsOptions = {}) => {
 
   useEffect(() => {
     fetchEvents();
-  }, [options.limit, options.offset, options.title, options.status, options.categorySlug]);
+  }, [options.limit, options.offset, options.title, options.categorySlug, options.startDate, options.endDate]);
 
   return {
     events,

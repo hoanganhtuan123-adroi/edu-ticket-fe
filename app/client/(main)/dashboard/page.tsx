@@ -11,7 +11,8 @@ const DashboardPage = () => {
   const [filters, setFilters] = useState({
     categorySlug: "",
     title: "",
-    status: "",
+    startDate: "",
+    endDate: "",
   });
 
   const { events, loading, error, pagination, loadMore } = useEvents({
@@ -19,7 +20,8 @@ const DashboardPage = () => {
     offset: 0,
     categorySlug: filters.categorySlug || undefined,
     title: filters.title || undefined,
-    status: filters.status || undefined,
+    startDate: filters.startDate || undefined,
+    endDate: filters.endDate || undefined,
   });
 
   // Transform API data to EventCard format
@@ -39,6 +41,7 @@ const DashboardPage = () => {
   }));
 
   const handleFilterChange = (newFilters: any) => {
+    console.log(newFilters);
     setFilters((prevFilters) => ({
       ...prevFilters,
       ...newFilters,

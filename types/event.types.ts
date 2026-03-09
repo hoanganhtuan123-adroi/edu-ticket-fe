@@ -21,8 +21,6 @@ export interface CreateTicketDto {
   type?: TicketType;
   price: number;
   quantityLimit: number;
-  startSaleTime?: string;
-  endSaleTime?: string;
   description?: string;
 }
 
@@ -46,6 +44,8 @@ export interface CreateEventDto {
   location: string;
   startTime: string;
   endTime: string;
+  startSaleTime?: string;
+  endSaleTime?: string;
   ticketTypes?: CreateTicketDto[];
   settings?: string | Record<string, any>;
 }

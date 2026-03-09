@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, MapPin, Calendar } from 'lucide-react';
+import { MapPin, Calendar } from 'lucide-react';
 import Link from 'next/link';
 
 export interface EventCardProps {
@@ -78,11 +78,6 @@ const EventCard: React.FC<EventCardProps> = ({
               Hết vé
             </span>
           </div>
-        )}
-        {!isSoldOut && (
-          <button className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow">
-            <Heart className={`w-4 h-4 ${isLiked ? 'text-red-500' : 'text-gray-600'}`} />
-          </button>
         )}
       </div>
       <div className="p-5">

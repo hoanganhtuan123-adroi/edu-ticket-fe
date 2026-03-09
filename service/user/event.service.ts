@@ -150,8 +150,9 @@ export const eventService = {
     limit?: number;
     offset?: number;
     title?: string;
-    status?: string;
     categorySlug?: string;
+    startDate?: string;
+    endDate?: string;
   }): Promise<any> => {
     try {
       const token = getOrganizerToken();
@@ -159,9 +160,12 @@ export const eventService = {
       if (filters?.limit) params.append("limit", filters.limit.toString());
       if (filters?.offset) params.append("offset", filters.offset.toString());
       if (filters?.title) params.append("title", filters.title);
-      if (filters?.status) params.append("status", filters.status);
       if (filters?.categorySlug)
         params.append("categorySlug", filters.categorySlug);
+      if (filters?.startDate)
+        params.append("startDate", filters.startDate);
+      if (filters?.endDate)
+        params.append("endDate", filters.endDate);
 
       const response = await api.get(
         `/events/client/list-events?${params.toString()}`,

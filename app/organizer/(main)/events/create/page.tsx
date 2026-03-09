@@ -14,6 +14,7 @@ import BannerUpload from '@/components/organizer/events/create/BannerUpload';
 import AttachmentUpload from '@/components/organizer/events/create/AttachmentUpload';
 import FormActions from '@/components/organizer/events/create/FormActions';
 import AdditionalInfoForm, { AdditionalInfo } from '@/components/organizer/events/create/AdditionalInfoForm';
+import TicketSaleTimeForm from '@/components/organizer/events/create/TicketSaleTimeForm';
 
 export default function CreateEventPage() {
   const router = useRouter();
@@ -38,6 +39,8 @@ export default function CreateEventPage() {
     location: '',
     startTime: '',
     endTime: '',
+    startSaleTime: '',
+    endSaleTime: '',
     ticketTypes: [],
   });
 
@@ -126,6 +129,28 @@ export default function CreateEventPage() {
       return 'Thời gian kết thúc phải sau thời gian bắt đầu';
     }
     
+    if (!formData.startSaleTime) {
+      return 'Vui lòng chọn thời gian bắt đầu bán vé';
+    }
+    
+    if (!formData.endSaleTime) {
+      return 'Vui lòng chọn thời gian kết thúc bán vé';
+    }
+    
+    if (new Date(formData.startSaleTime) >= new Date(formData.endSaleTime)) {
+      return 'Thời gian kết thúc bán vé phải sau thời gian bắt đầu bán vé';
+    }
+    
+    if (formData.ticketTypes && formData.ticketTypes.length > 0) {
+      if (new Date(formData.startSaleTime) >= new Date(formData.startTime)) {
+        return 'Thời gian bắt đầu bán vé phải trước thời gian bắt đầu sự kiện';
+      }
+      
+      if (new Date(formData.endSaleTime) > new Date(formData.endTime)) {
+        return 'Thời gian kết thúc bán vé không được sau thời gian kết thúc sự kiện';
+      }
+    }
+    
     if (!formData.ticketTypes || formData.ticketTypes.length === 0) {
       return 'Phải có ít nhất một loại vé';
     }
@@ -170,9 +195,13 @@ export default function CreateEventPage() {
       // Convert datetime-local to ISO8601 format
       const startTimeISO = formData.startTime ? new Date(formData.startTime).toISOString() : '';
       const endTimeISO = formData.endTime ? new Date(formData.endTime).toISOString() : '';
+      const startSaleTimeISO = formData.startSaleTime ? new Date(formData.startSaleTime).toISOString() : '';
+      const endSaleTimeISO = formData.endSaleTime ? new Date(formData.endSaleTime).toISOString() : '';
       
       submitData.append('startTime', startTimeISO);
       submitData.append('endTime', endTimeISO);
+      submitData.append('startSaleTime', startSaleTimeISO);
+      submitData.append('endSaleTime', endSaleTimeISO);
       
       // Add banner file if provided
       if (bannerFile) {
@@ -194,7 +223,12 @@ export default function CreateEventPage() {
       if (formData.ticketTypes && formData.ticketTypes.length > 0) {
         const cleanedTicketTypes = formData.ticketTypes.map((ticket: any) => {
           const { id, ...cleanedTicket } = ticket;
-          return cleanedTicket;
+          // Add common sale times to each ticket
+          return {
+            ...cleanedTicket,
+            startSaleTime: startSaleTimeISO,
+            endSaleTime: endSaleTimeISO
+          };
         });
         submitData.append('ticketTypes', JSON.stringify(cleanedTicketTypes));
       }
@@ -331,6 +365,13 @@ export default function CreateEventPage() {
             <AttachmentUpload
               attachments={attachments}
               onAttachmentsChange={handleAttachmentsChange}
+            />
+            
+            <TicketSaleTimeForm
+              startSaleTime={formData.startSaleTime || ''}
+              endSaleTime={formData.endSaleTime || ''}
+              onStartTimeChange={(time) => handleInputChange('startSaleTime', time)}
+              onEndTimeChange={(time) => handleInputChange('endSaleTime', time)}
             />
             
             <TicketTypeManager
