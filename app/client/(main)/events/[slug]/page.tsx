@@ -12,7 +12,7 @@ const EventDetailPage = () => {
   const params = useParams();
   const slug = params.slug as string;
   
-  const { event, loading, error, refresh } = useEventDetail(slug);
+  const { event, loading, error } = useEventDetail(slug);
 
   const getEventStatus = (startTime: string, endTime: string) => {
     const now = new Date();

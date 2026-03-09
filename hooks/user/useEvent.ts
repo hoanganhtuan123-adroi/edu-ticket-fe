@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { eventService, EventDetailResponse } from '@/service/user/event.service';
 
 export interface Event {
-  id: string;
   title: string;
   slug: string;
   description: string;
@@ -12,7 +11,12 @@ export interface Event {
   location: string;
   startTime: string;
   endTime: string;
-  status: string;
+  status: string; // ticketSaleStatus from API
+  ticketSaleStatus: string; // Add ticket sale status field
+  isSoldOut: boolean;
+  category: string;
+  minPrice: number | null; // Add minimum price field
+  maxPrice: number | null; // Add maximum price field
 }
 
 export interface PaginatedEventsResponse {

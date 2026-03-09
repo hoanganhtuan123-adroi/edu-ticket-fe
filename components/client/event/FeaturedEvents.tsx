@@ -19,19 +19,11 @@ const FeaturedEvents: React.FC<FeaturedEventsProps> = ({
     <section className="mb-8">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Sự kiện nổi bật</h2>
-        <div className="flex space-x-2">
-          <button className="p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow">
-            <ChevronLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <button className="p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow">
-            <ChevronRight className="w-5 h-5 text-gray-600" />
-          </button>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {events.map((event) => (
-          <EventCard key={event.id} {...event} />
+          <EventCard key={event.slug} {...event} />
         ))}
       </div>
 
@@ -48,7 +40,7 @@ const FeaturedEvents: React.FC<FeaturedEventsProps> = ({
             onClick={onLoadMore}
             className="bg-purple-700 text-white px-8 py-3 rounded-lg font-medium hover:bg-purple-800 transition-colors"
           >
-            Xem thêm sự kiện
+            Xem thêm
           </button>
         </div>
       )}
