@@ -22,6 +22,7 @@ export interface CreateTicketDto {
   price: number;
   quantityLimit: number;
   description?: string;
+  requiresApproval?: boolean;
 }
 
 export interface TicketTypeData {
@@ -35,6 +36,7 @@ export interface TicketTypeData {
   endSaleTime: string;
   description?: string;
   status: string;
+  requiresApproval?: boolean;
 }
 
 export interface CreateEventDto {

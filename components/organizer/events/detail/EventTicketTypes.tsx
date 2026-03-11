@@ -1,5 +1,5 @@
-import React from 'react';
 import { Event, TicketType } from '@/types/event.types';
+import { Shield, CheckCircle } from 'lucide-react';
 
 interface EventTicketTypesProps {
   event: Event;
@@ -35,6 +35,40 @@ export default function EventTicketTypes({ event }: EventTicketTypesProps) {
       style: 'currency',
       currency: 'VND',
     }).format(amount);
+  };
+
+  const getTicketStatusColor = (status: string) => {
+    switch (status) {
+      case 'DRAFT':
+        return 'bg-gray-100 text-gray-800';
+      case 'UPCOMING':
+        return 'bg-blue-100 text-blue-800';
+      case 'ON_SALE':
+        return 'bg-green-100 text-green-800';
+      case 'SOLD_OUT':
+        return 'bg-red-100 text-red-800';
+      case 'CLOSED':
+        return 'bg-orange-100 text-orange-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getTicketStatusText = (status: string) => {
+    switch (status) {
+      case 'DRAFT':
+        return 'Nháp';
+      case 'UPCOMING':
+        return 'Sắp mở bán';
+      case 'ON_SALE':
+        return 'Đang bán';
+      case 'SOLD_OUT':
+        return 'Hết vé';
+      case 'CLOSED':
+        return 'Đã đóng';
+      default:
+        return 'Không xác định';
+    }
   };
 
 
@@ -77,7 +111,7 @@ export default function EventTicketTypes({ event }: EventTicketTypesProps) {
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Tên loại vé
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-32">
                     Loại vé
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -88,6 +122,12 @@ export default function EventTicketTypes({ event }: EventTicketTypesProps) {
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Đã bán
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Yêu cầu duyệt
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Trạng thái
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Thời gian bắt đầu bán
@@ -113,11 +153,7 @@ export default function EventTicketTypes({ event }: EventTicketTypesProps) {
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm font-semibold text-gray-900">
-                        {ticket.price === "0.00" ? (
-                          <span className="text-green-600">Miễn phí</span>
-                        ) : (
-                          formatCurrency(Number(ticket.price))
-                        )}
+                        {formatCurrency(Number(ticket.price))}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900">
@@ -126,12 +162,25 @@ export default function EventTicketTypes({ event }: EventTicketTypesProps) {
                     <td className="px-6 py-4 text-sm text-gray-900">
                       <div className="flex items-center">
                         <span>{ticket.soldQuantity || 0}</span>
-                        {ticket.quantityLimit > 0 && (
-                          <span className="ml-2 text-xs text-gray-500">
-                            ({Math.round((ticket.soldQuantity || 0) / ticket.quantityLimit * 100)}%)
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        {ticket.requiresApproval ? (
+                          <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-800">
+                            Cần duyệt
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                            Tự động
                           </span>
                         )}
                       </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getTicketStatusColor(ticket.status || 'DRAFT')}`}>
+                        {getTicketStatusText(ticket.status || 'DRAFT')}
+                      </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900">
                       {ticket.startSaleTime ? formatDateTime(ticket.startSaleTime) : <span className="text-gray-400">Chưa thiết lập</span>}
@@ -154,9 +203,23 @@ export default function EventTicketTypes({ event }: EventTicketTypesProps) {
             <div className="flex items-start justify-between mb-4">
               <div className="ml-3">
                 <div className="font-medium text-gray-900">{ticket.name}</div>
-                <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 mt-1">
-                  {ticket.type ? getTicketTypeLabel(ticket.type) : '-'}
-                </span>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                    {ticket.type ? getTicketTypeLabel(ticket.type) : '-'}
+                  </span>
+                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getTicketStatusColor(ticket.status || 'DRAFT')}`}>
+                    {getTicketStatusText(ticket.status || 'DRAFT')}
+                  </span>
+                  {ticket.requiresApproval ? (
+                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-800">
+                      Cần duyệt
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                      Tự động
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
             
@@ -168,7 +231,7 @@ export default function EventTicketTypes({ event }: EventTicketTypesProps) {
               <div>
                 <span className="text-gray-500 block mb-1">Giá vé</span>
                 <span className="font-semibold text-gray-900">
-                  {ticket.price === "0.00" ? 'Miễn phí' : formatCurrency(Number(ticket.price))}
+                  {formatCurrency(Number(ticket.price))}
                 </span>
               </div>
               <div>

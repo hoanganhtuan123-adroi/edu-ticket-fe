@@ -178,7 +178,7 @@ export const useAdminAuth = () => {
           error: null,
         }));
 
-        toast.success("Admin login successful!");
+        toast.success("Đăng nhập admin thành công!");
 
         // Step 6: Redirect to admin dashboard
         router.push("/admin/dashboard");

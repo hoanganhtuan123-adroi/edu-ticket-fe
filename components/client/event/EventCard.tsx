@@ -3,19 +3,21 @@ import { MapPin, Calendar } from 'lucide-react';
 import Link from 'next/link';
 
 export interface EventCardProps {
-  slug: string;
   title: string;
+  slug: string;
   description: string;
   bannerUrl: string;
   location: string;
   startTime: string;
-  status: string; // Now this is ticketSaleStatus from API
-  price?: number | null; // Allow null for minPrice from API
-  maxPrice?: number | null; // Add maxPrice field
+  status: string; 
+  eventStatus?: string; 
+  price?: number | null; 
+  maxPrice?: number | null; 
   isFree?: boolean;
   isLiked?: boolean;
-  isSoldOut?: boolean; // Add sold out flag
-  category?: string; // Add category for display
+  isSoldOut?: boolean; 
+  category?: string; 
+  onClick?: () => void;
 }
 
 const EventCard: React.FC<EventCardProps> = ({
@@ -26,15 +28,38 @@ const EventCard: React.FC<EventCardProps> = ({
   location,
   startTime,
   status,
+  eventStatus,
   price,
   maxPrice,
   isFree,
   isLiked = false,
   isSoldOut = false,
   category,
+  onClick,
 }) => {
-  const getTicketStatusColor = (ticketSaleStatus: string) => {
-    switch (ticketSaleStatus) {
+  const getDisplayStatus = (ticketSaleStatus: string, eventStatus?: string) => {
+    // Map event status to display status
+    if (eventStatus === 'APPROVED') {
+      return 'Sắp diễn ra';
+    }
+    if (eventStatus === 'ONGOING') {
+      return 'Đang diễn ra';
+    }
+    if (eventStatus === 'COMPLETED') {
+      return 'Đã kết thúc';
+    }
+    // Otherwise, use ticket sale status
+    return ticketSaleStatus;
+  };
+
+  const getTicketStatusColor = (displayStatus: string) => {
+    switch (displayStatus) {
+      case 'Sắp diễn ra':
+        return 'bg-blue-500';
+      case 'Đang diễn ra':
+        return 'bg-green-500';
+      case 'Đã kết thúc':
+        return 'bg-gray-500';
       case 'Sắp mở bán':
         return 'bg-blue-500';
       case 'Đang mở bán':
@@ -68,8 +93,8 @@ const EventCard: React.FC<EventCardProps> = ({
           className="w-full h-48 object-cover" 
         />
         <div className="absolute top-3 left-3">
-          <span className={`${getTicketStatusColor(status)} text-white px-3 py-1 rounded-full text-sm font-medium`}>
-            {status}
+          <span className={`${getTicketStatusColor(getDisplayStatus(status, eventStatus))} text-white px-3 py-1 rounded-full text-sm font-medium`}>
+            {getDisplayStatus(status, eventStatus)}
           </span>
         </div>
         {isSoldOut && (

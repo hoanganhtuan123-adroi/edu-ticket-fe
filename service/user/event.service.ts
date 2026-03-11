@@ -47,6 +47,7 @@ export interface EventDetailResponse {
     targetAudience?: string;
   };
   ticketTypes?: Array<{
+    id: string;  // Thêm ID
     name: string;
     type: string;
     price: string;
@@ -55,6 +56,7 @@ export interface EventDetailResponse {
     startSaleTime: string;
     endSaleTime: string;
     description?: string;
+    status: string;
   }>;
   category: {
     name: string;

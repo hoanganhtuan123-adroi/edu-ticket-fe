@@ -9,7 +9,8 @@ import {
   Download,
   FileText,
   X,
-  Target
+  Target,
+  Shield
 } from 'lucide-react';
 import { AdminEventDetail } from '@/service/admin/event.service';
 import { useState } from 'react';
@@ -93,6 +94,38 @@ export default function AdminEventDetailContent({ event, onApprove, onReject }: 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.DRAFT;
     return (
       <span className={`px-3 py-1 rounded-full text-sm font-medium border ${config.color}`}>
+        {config.label}
+      </span>
+    );
+  };
+
+  const getTicketStatusBadge = (status: string) => {
+    const statusConfig = {
+      DRAFT: {
+        color: 'bg-gray-100 text-gray-800',
+        label: 'Nháp',
+      },
+      UPCOMING: {
+        color: 'bg-blue-100 text-blue-800',
+        label: 'Sắp mở bán',
+      },
+      ON_SALE: {
+        color: 'bg-green-100 text-green-800',
+        label: 'Đang bán',
+      },
+      SOLD_OUT: {
+        color: 'bg-red-100 text-red-800',
+        label: 'Hết vé',
+      },
+      CLOSED: {
+        color: 'bg-orange-100 text-orange-800',
+        label: 'Đã đóng',
+      },
+    };
+
+    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.DRAFT;
+    return (
+      <span className={`px-2 py-1 text-xs rounded-full ${config.color}`}>
         {config.label}
       </span>
     );
@@ -313,6 +346,8 @@ export default function AdminEventDetailContent({ event, onApprove, onReject }: 
                         <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">Giá</th>
                         <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">Số lượng</th>
                         <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">Đã bán</th>
+                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">Yêu cầu duyệt</th>
+                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">Trạng thái</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -327,7 +362,7 @@ export default function AdminEventDetailContent({ event, onApprove, onReject }: 
                                   ? 'bg-purple-100 text-purple-800' 
                                   : 'bg-gray-100 text-gray-800'
                               }`}>
-                                {ticket.type}
+                                {ticket.type === 'VIP' ? 'VIP' : 'Thường'}
                               </span>
                             </div>
                           </td>
@@ -339,6 +374,25 @@ export default function AdminEventDetailContent({ event, onApprove, onReject }: 
                           </td>
                           <td className="py-3 px-4">
                             <p className="text-gray-900">{ticket.soldQuantity}</p>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-2">
+                              {ticket.requiresApproval ? (
+                                <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-800">
+                                  Cần duyệt
+                                </span>
+                              ) : (
+                                <>
+                                  <CheckCircle className="w-4 h-4 text-green-600" />
+                                  <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                                    Tự động
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            {getTicketStatusBadge(ticket.status || 'DRAFT')}
                           </td>
                         </tr>
                       ))}

@@ -44,6 +44,8 @@ export interface AdminEventDetail {
     startSaleTime?: string;
     endSaleTime?: string;
     description?: string;
+    status: string;
+    requiresApproval?: boolean;
   }[];
   approvalHistory?: {
     id: string;

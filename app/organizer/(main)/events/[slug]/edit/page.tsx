@@ -56,6 +56,7 @@ export default function EditEventPage() {
             eventData.ticketTypes?.map((ticket) => ({
               ...ticket,
               price: parseFloat(ticket.price),
+              requiresApproval: ticket.requiresApproval || false,
             })) || [],
         });
       } else {

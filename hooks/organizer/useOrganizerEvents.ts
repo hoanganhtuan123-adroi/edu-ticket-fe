@@ -51,8 +51,9 @@ export const useOrganizerEvents = () => {
       const response = await eventService.createEvent(eventData);
       return response;
     } catch (err: any) {
-      setError(err.message || 'Không thể tạo sự kiện');
-      return null;
+      const errorMessage = err.message || 'Không thể tạo sự kiện';
+      setError(errorMessage);
+      throw new Error(errorMessage); // Re-throw to let component handle it
     } finally {
       setIsLoading(false);
     }

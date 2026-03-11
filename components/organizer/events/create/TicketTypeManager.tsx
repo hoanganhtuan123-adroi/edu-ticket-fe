@@ -15,6 +15,7 @@ export default function TicketTypeManager({ ticketTypes, onTicketTypesChange }: 
     price: 0,
     quantityLimit: 100,
     description: '',
+    requiresApproval: false,
   });
 
   const addTicketType = () => {
@@ -40,6 +41,7 @@ export default function TicketTypeManager({ ticketTypes, onTicketTypesChange }: 
       price: 0,
       quantityLimit: 100,
       description: '',
+      requiresApproval: false,
     });
   };
 
@@ -149,6 +151,23 @@ export default function TicketTypeManager({ ticketTypes, onTicketTypesChange }: 
                   />
                 </div>
                 
+                <div className="mt-4">
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={ticket.requiresApproval || false}
+                      onChange={(e) => updateTicketType(index, 'requiresApproval', e.target.checked)}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700">
+                      Yêu cầu duyệt vé
+                    </span>
+                  </label>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Nếu bật, người đăng ký vé này sẽ cần được admin duyệt trước khi vé được kích hoạt
+                  </p>
+                </div>
+                
                 <div className="mt-4 flex justify-end">
                   <button
                     type="button"
@@ -237,6 +256,23 @@ export default function TicketTypeManager({ ticketTypes, onTicketTypesChange }: 
               rows={2}
               placeholder="Mô tả chi tiết về loại vé này..."
             />
+          </div>
+          
+          <div className="mt-4">
+            <label className="flex items-center space-x-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={newTicket.requiresApproval || false}
+                onChange={(e) => setNewTicket({ ...newTicket, requiresApproval: e.target.checked })}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm font-medium text-gray-700">
+                Yêu cầu duyệt vé
+              </span>
+            </label>
+            <p className="mt-1 text-xs text-gray-500">
+              Nếu bật, người đăng ký vé này sẽ cần được admin duyệt trước khi vé được kích hoạt
+            </p>
           </div>
           
           <div className="mt-4">

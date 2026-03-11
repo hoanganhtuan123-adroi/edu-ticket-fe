@@ -170,8 +170,8 @@ export default function EventPreviewPage() {
           <div className="mb-6">
             <EventStatusBadge status={event.status} />
           </div>
-          
-          {/* Event Details */}
+
+          {/* Event Actions */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2">
@@ -294,9 +294,6 @@ export default function EventPreviewPage() {
                       )}
                     </div>
                   )}
-                  
-                  {/* Ticket Types */}
-                  <EventTicketTypes event={event} />
                 </div>
               </div>
             </div>
@@ -427,6 +424,11 @@ export default function EventPreviewPage() {
                 </div>
               </div>
             </div>
+          </div>
+          
+          {/* Ticket Types - Full Width */}
+          <div className="mt-8">
+            <EventTicketTypes event={event} />
           </div>
           
           {/* Action Buttons */}

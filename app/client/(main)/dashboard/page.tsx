@@ -33,6 +33,7 @@ const DashboardPage = () => {
     location: event.location,
     startTime: event.startTime,
     status: event.ticketSaleStatus,
+    eventStatus: event.status, // Add event status
     isFree: event.minPrice === 0, // Calculate free from minPrice
     isSoldOut: event.isSoldOut,
     category: event.category,

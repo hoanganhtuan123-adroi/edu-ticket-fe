@@ -250,15 +250,13 @@ export default function CreateEventPage() {
         }
       }
       
-      const success = await createEvent(submitData);
+      await createEvent(submitData);
       
-      if (success) {
-        toast.success('Tạo sự kiện thành công! Đang chuyển hướng...');
-        
-        setTimeout(() => {
-          router.push('/organizer/events');
-        }, 1500);
-      }
+      toast.success('Tạo sự kiện thành công! Đang chuyển hướng...');
+      
+      setTimeout(() => {
+        router.push('/organizer/events');
+      }, 1500);
     } catch (error: any) {
       toast.error(error.message || 'Tạo sự kiện thất bại. Vui lòng thử lại.');
     }
@@ -280,15 +278,13 @@ export default function CreateEventPage() {
         }) || []
       };
       
-      const success = await createEvent(cleanedFormData);
+      await createEvent(cleanedFormData);
       
-      if (success) {
-        toast.success('Lưu nháp thành công!');
-        
-        setTimeout(() => {
-          router.push('/organizer/events');
-        }, 1500);
-      }
+      toast.success('Lưu nháp thành công!');
+      
+      setTimeout(() => {
+        router.push('/organizer/events');
+      }, 1500);
     } catch (error: any) {
       toast.error(error.message || 'Lưu nháp thất bại. Vui lòng thử lại.');
     }
