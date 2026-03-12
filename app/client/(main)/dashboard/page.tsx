@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import DashboardHeader from "@/components/client/layout/DashboardHeader";
 import DashboardFooter from "@/components/client/layout/DashboardFooter";
 import FilterSection from "@/components/client/event/FilterSection";
 import FeaturedEvents from "@/components/client/event/FeaturedEvents";
@@ -51,8 +50,6 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardHeader />
-
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <FilterSection onFilterChange={handleFilterChange} />

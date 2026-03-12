@@ -21,7 +21,7 @@ export interface AdminAuthState {
 const setAdminCookie = (token: string) => {
   if (typeof window !== "undefined") {
     const expires = new Date();
-    expires.setTime(expires.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    expires.setTime(expires.getTime() + 3 * 60 * 60 * 1000); // 3 hours
     
     try {
       // Set cookie only
