@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Menu, X, LogOut, User, FileText, ChevronDown, Settings } from "lucide-react";
+import { Menu, X, LogOut, User, FileText, ChevronDown, Settings, ScanQrCode } from "lucide-react";
 import Link from "next/link";
 import { OrganizerNotificationBell } from "../notification/NotificationBell";
 
@@ -84,6 +84,13 @@ export default function OrganizerHeader() {
               className="text-gray-600 hover:text-emerald-600 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-emerald-50 relative group"
             >
               Thống kê
+              <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-emerald-600 transition-all duration-200 group-hover:w-8 group-hover:left-1/2 group-hover:-translate-x-1/2"></span>
+            </Link>
+            <Link
+              href="/organizer/check-in"
+              className="text-gray-600 hover:text-emerald-600 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-emerald-50 relative group"
+            >
+              Check-in
               <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-emerald-600 transition-all duration-200 group-hover:w-8 group-hover:left-1/2 group-hover:-translate-x-1/2"></span>
             </Link>
           </nav>
@@ -316,12 +323,25 @@ export default function OrganizerHeader() {
                     Thống kê
                   </Link>
                 </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <Link
+                    href="/organizer/check-in"
+                    className="block px-4 py-3 text-gray-700 hover:text-emerald-600 font-medium bg-white rounded-lg hover:bg-emerald-50 transition-all duration-200 border border-transparent hover:border-emerald-200"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Check-in
+                  </Link>
+                </motion.div>
                 
                 {/* Mobile notifications */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
+                  transition={{ delay: 0.35 }}
                 >
                   <div className="px-4 py-3 bg-white rounded-lg border border-gray-200">
                     <div className="flex items-center justify-between">
@@ -335,7 +355,7 @@ export default function OrganizerHeader() {
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.35 }}
+                  transition={{ delay: 0.4 }}
                 >
                   <hr className="my-3 border-gray-200" />
                 </motion.div>
@@ -343,7 +363,7 @@ export default function OrganizerHeader() {
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 }}
+                  transition={{ delay: 0.45 }}
                 >
                   <Link
                     href="/organizer/profile"
@@ -357,7 +377,7 @@ export default function OrganizerHeader() {
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.45 }}
+                  transition={{ delay: 0.5 }}
                 >
                   <Link
                     href="/organizer/support/requests"
@@ -371,7 +391,7 @@ export default function OrganizerHeader() {
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 }}
+                  transition={{ delay: 0.55 }}
                 >
                   <Link
                     href="/organizer/settings"
@@ -385,7 +405,7 @@ export default function OrganizerHeader() {
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.55 }}
+                  transition={{ delay: 0.6 }}
                 >
                   <button
                     onClick={() => {

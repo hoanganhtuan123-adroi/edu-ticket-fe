@@ -28,23 +28,6 @@ export default function OrganizerLayout({
       </div>
     );
   }
-
-  // if (!isAuthenticated) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center">
-  //       <div className="text-center">
-  //         <p className="text-gray-600 mb-4">Bạn cần đăng nhập để truy cập trang này</p>
-  //         <a
-  //           href="/organizer/login"
-  //           className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-  //         >
-  //           Đăng nhập
-  //         </a>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   return (
     <div className="min-h-screen">
       {/* {isAuthenticated && <OrganizerHeader />} */}
