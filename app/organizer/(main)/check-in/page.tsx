@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { CalendarDays } from "lucide-react";
 import { useCheckIn } from "@/hooks/organizer/useCheckIn";
 import { CheckInFilters } from "@/service/organizer/checkin.service";

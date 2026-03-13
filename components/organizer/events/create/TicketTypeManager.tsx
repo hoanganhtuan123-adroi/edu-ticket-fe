@@ -18,9 +18,35 @@ export default function TicketTypeManager({ ticketTypes, onTicketTypesChange }: 
     requiresApproval: false,
   });
 
+  // Auto set price to 0 when type is FREE
+  const handleTicketTypeChange = (index: number, type: TicketType) => {
+    const updatedTickets = [...ticketTypes];
+    updatedTickets[index] = { 
+      ...updatedTickets[index], 
+      type,
+      price: type === TicketType.FREE ? 0 : updatedTickets[index].price
+    };
+    onTicketTypesChange(updatedTickets);
+  };
+
+  // Auto set price to 0 when type is FREE for new ticket
+  const handleNewTicketTypeChange = (type: TicketType) => {
+    setNewTicket({ 
+      ...newTicket, 
+      type,
+      price: type === TicketType.FREE ? 0 : newTicket.price
+    });
+  };
+
   const addTicketType = () => {
     if (!newTicket.name.trim()) {
       alert('Vui lòng nhập tên loại vé');
+      return;
+    }
+
+    // Validate price for non-FREE tickets
+    if (newTicket.type !== TicketType.FREE && newTicket.price <= 0) {
+      alert('Vé thường và VIP phải có giá lớn hơn 0');
       return;
     }
 
@@ -59,10 +85,6 @@ export default function TicketTypeManager({ ticketTypes, onTicketTypesChange }: 
     const labels = {
       [TicketType.REGULAR]: 'Thường',
       [TicketType.VIP]: 'VIP',
-      [TicketType.EARLY_BIRD]: 'Early Bird',
-      [TicketType.STUDENT]: 'Sinh viên',
-      [TicketType.GROUP]: 'Nhóm',
-      [TicketType.SPONSOR]: 'Nhà tài trợ',
       [TicketType.FREE]: 'Miễn phí',
     };
     return labels[type] || type;
@@ -98,7 +120,7 @@ export default function TicketTypeManager({ ticketTypes, onTicketTypesChange }: 
                     </label>
                     <select
                       value={ticket.type}
-                      onChange={(e) => updateTicketType(index, 'type', e.target.value as TicketType)}
+                      onChange={(e) => handleTicketTypeChange(index, e.target.value as TicketType)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       {Object.values(TicketType).map((type) => (
@@ -111,14 +133,19 @@ export default function TicketTypeManager({ ticketTypes, onTicketTypesChange }: 
                   
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Giá vé (VNĐ) *
+                      Giá vé (VNĐ) {ticket.type === TicketType.FREE ? '(Miễn phí)' : '*'}
                     </label>
                     <input
                       type="number"
                       value={ticket.price}
                       onChange={(e) => updateTicketType(index, 'price', Number(e.target.value))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="0"
+                      disabled={ticket.type === TicketType.FREE}
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10 ${
+                        ticket.type === TicketType.FREE 
+                          ? 'bg-gray-100 border-gray-300 cursor-not-allowed' 
+                          : 'border-gray-300'
+                      }`}
+                      placeholder={ticket.type === TicketType.FREE ? '0' : 'Nhập giá vé'}
                       min="0"
                     />
                   </div>
@@ -131,12 +158,18 @@ export default function TicketTypeManager({ ticketTypes, onTicketTypesChange }: 
                       type="number"
                       value={ticket.quantityLimit}
                       onChange={(e) => updateTicketType(index, 'quantityLimit', Number(e.target.value))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10"
                       placeholder="100"
                       min="1"
                     />
                   </div>
                 </div>
+                
+                {ticket.type === TicketType.FREE && (
+                  <div className="mt-2">
+                    <p className="text-xs text-gray-500">Vé miễn phí có giá mặc định là 0</p>
+                  </div>
+                )}
                 
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -205,7 +238,7 @@ export default function TicketTypeManager({ ticketTypes, onTicketTypesChange }: 
               </label>
               <select
                 value={newTicket.type}
-                onChange={(e) => setNewTicket({ ...newTicket, type: e.target.value as TicketType })}
+                onChange={(e) => handleNewTicketTypeChange(e.target.value as TicketType)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {Object.values(TicketType).map((type) => (
@@ -218,14 +251,19 @@ export default function TicketTypeManager({ ticketTypes, onTicketTypesChange }: 
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Giá vé (VNĐ) *
+                Giá vé (VNĐ) {newTicket.type === TicketType.FREE ? '(Miễn phí)' : '*'}
               </label>
               <input
                 type="number"
                 value={newTicket.price}
                 onChange={(e) => setNewTicket({ ...newTicket, price: Number(e.target.value) })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="0"
+                disabled={newTicket.type === TicketType.FREE}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10 ${
+                  newTicket.type === TicketType.FREE 
+                    ? 'bg-gray-100 border-gray-300 cursor-not-allowed' 
+                    : 'border-gray-300'
+                }`}
+                placeholder={newTicket.type === TicketType.FREE ? '0' : 'Nhập giá vé'}
                 min="0"
               />
             </div>
@@ -238,12 +276,18 @@ export default function TicketTypeManager({ ticketTypes, onTicketTypesChange }: 
                 type="number"
                 value={newTicket.quantityLimit}
                 onChange={(e) => setNewTicket({ ...newTicket, quantityLimit: Number(e.target.value) })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10"
                 placeholder="100"
                 min="1"
               />
             </div>
           </div>
+          
+          {newTicket.type === TicketType.FREE && (
+            <div className="mt-2">
+              <p className="text-xs text-gray-500">Vé miễn phí có giá mặc định là 0</p>
+            </div>
+          )}
           
           <div className="mt-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">

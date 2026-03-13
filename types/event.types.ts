@@ -1,10 +1,6 @@
 export enum TicketType {
   REGULAR = 'REGULAR',
   VIP = 'VIP',
-  EARLY_BIRD = 'EARLY_BIRD',
-  STUDENT = 'STUDENT',
-  GROUP = 'GROUP',
-  SPONSOR = 'SPONSOR',
   FREE = 'FREE',
 }
 

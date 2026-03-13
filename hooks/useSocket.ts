@@ -11,6 +11,7 @@ interface UseSocketReturn {
   onEventStatusChanged: (callback: (data: unknown) => void) => () => void;
   onNotification: (callback: (data: unknown) => void) => () => void;
   onUnreadCountUpdated: (callback: (data: { count: number }) => void) => () => void;
+  onNewCheckIn: (callback: (data: unknown) => void) => () => void;
 }
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
@@ -92,6 +93,10 @@ export const useSocket = (): UseSocketReturn => {
       listenersRef.current.get('userDisconnected')?.forEach(cb => cb(data));
     });
 
+    socket.on('newCheckIn', (data: unknown) => {
+      listenersRef.current.get('newCheckIn')?.forEach(cb => cb(data));
+    });
+
     socketRef.current = socket;
 
     return () => {
@@ -134,6 +139,10 @@ export const useSocket = (): UseSocketReturn => {
     return addListener('unreadCountUpdated', callback as (data: unknown) => void);
   }, [addListener]);
 
+  const onNewCheckIn = useCallback((callback: (data: unknown) => void) => {
+    return addListener('newCheckIn', callback);
+  }, [addListener]);
+
   return {
     connected,
     socketId,
@@ -143,5 +152,6 @@ export const useSocket = (): UseSocketReturn => {
     onEventStatusChanged,
     onNotification,
     onUnreadCountUpdated,
+    onNewCheckIn,
   };
 };

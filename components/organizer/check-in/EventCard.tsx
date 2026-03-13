@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Clock, MapPin, Users, ArrowRight, QrCode } from "lucide-react";
+import { Clock, MapPin, Users, ArrowRight, QrCode, BarChart3 } from "lucide-react";
 import { CheckInEvent } from "@/service/organizer/checkin.service";
 import QRScanner from "./QRScanner";
 import toast from "react-hot-toast";
+import Link from "next/link";
 
 interface EventCardProps {
   event: CheckInEvent;
@@ -11,6 +12,27 @@ interface EventCardProps {
 
 const EventCard: React.FC<EventCardProps> = ({ event, index }) => {
   const [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
+
+  const getEventDisplayStatus = (status: string) => {
+    const now = new Date();
+    const startTime = new Date(event.startTime);
+    const endTime = new Date(event.endTime);
+    
+    if (status === 'PENDING')
+      return { statusLabel: 'Chờ duyệt', color: 'orange' };
+    if (status === 'APPROVED') {
+      if (now < startTime)
+        return { statusLabel: 'Sắp bắt đầu', color: 'blue' };
+      if (now <= endTime)
+        return { statusLabel: 'Đang diễn ra', color: 'green' };
+      return { statusLabel: 'Đã kết thúc', color: 'gray' };
+    }
+    if (status === 'COMPLETED')
+      return { statusLabel: 'Đã kết thúc', color: 'gray' };
+    
+    // Default fallback
+    return { statusLabel: status, color: 'gray' };
+  };
 
   const getStatusColor = (color: string) => {
     const colorMap: { [key: string]: string } = {
@@ -44,10 +66,10 @@ const EventCard: React.FC<EventCardProps> = ({ event, index }) => {
             <div className="flex items-center gap-3 mb-3">
               <span
                 className={`px-3 py-1.5 rounded-xl text-sm font-medium border ${getStatusColor(
-                  event.statusColor
+                  getEventDisplayStatus(event.status).color
                 )}`}
               >
-                {event.status}
+                {getEventDisplayStatus(event.status).statusLabel}
               </span>
               <span className="text-sm text-gray-400">•</span>
               <span className="text-sm text-gray-500">
@@ -154,16 +176,43 @@ const EventCard: React.FC<EventCardProps> = ({ event, index }) => {
                 </div>
               </div>
 
-              <button
-                className="px-6 py-3 bg-linear-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium shadow-md shadow-blue-200 flex items-center group/btn"
-                onClick={() => {
-                  setIsQRScannerOpen(true);
-                }}
+              {/* Check-in Button - Only show for approved events */}
+              {event.status === 'APPROVED' && (
+                <button
+                  className="px-6 py-3 bg-linear-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium shadow-md shadow-blue-200 flex items-center group/btn"
+                  onClick={() => {
+                    setIsQRScannerOpen(true);
+                  }}
+                >
+                  <QrCode className="w-4 h-4 mr-2" />
+                  <span>Quét QR Check-in</span>
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+                </button>
+              )}
+
+              {/* Show disabled button for pending events */}
+              {event.status !== 'APPROVED' && (
+                <div className="relative">
+                  <button
+                    disabled
+                    className="px-6 py-3 bg-gray-300 text-gray-500 rounded-xl cursor-not-allowed font-medium shadow-md flex items-center opacity-60"
+                    title="Sự kiện chưa được duyệt, không thể check-in"
+                  >
+                    <QrCode className="w-4 h-4 mr-2" />
+                    <span>Chờ duyệt</span>
+                  </button>
+                </div>
+              )}
+
+              {/* View Details Button */}
+              <Link
+                href={`/organizer/check-in/detail/${event.id}`}
+                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium flex items-center group"
               >
-                <QrCode className="w-4 h-4 mr-2" />
-                <span>Quét QR Check-in</span>
-                <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
-              </button>
+                <BarChart3 className="w-4 h-4 mr-2" />
+                <span>Xem chi tiết</span>
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Link>
 
               {/* QR Scanner Modal */}
               <QRScanner

@@ -160,9 +160,19 @@ export default function CreateEventPage() {
       if (!ticket.name.trim()) {
         return 'Vui lòng nhập tên cho tất cả các loại vé';
       }
-      if (ticket.price < 0) {
-        return 'Giá vé không được âm';
+      
+      // Check price validation based on ticket type
+      if (ticket.type === 'FREE') {
+        if (ticket.price !== 0) {
+          return 'Vé miễn phí phải có giá là 0';
+        }
+      } else {
+        // For REGULAR and VIP
+        if (ticket.price <= 0) {
+          return 'Vé thường và VIP phải có giá lớn hơn 0';
+        }
       }
+      
       if (ticket.quantityLimit <= 0) {
         return 'Số lượng giới hạn phải lớn hơn 0';
       }
