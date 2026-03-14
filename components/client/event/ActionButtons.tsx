@@ -25,19 +25,6 @@ const ActionButtons = ({ ticketStatus }: ActionButtonsProps) => {
           </p>
         </div>
       </div>
-      <button
-        className={`w-full py-3 rounded-lg font-medium transition-colors mb-3 ${
-          ticketStatus.disabled
-            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-            : `${ticketStatus.color} text-white hover:opacity-90`
-        }`}
-        disabled={ticketStatus.disabled}
-      >
-        {ticketStatus.text}
-      </button>
-      <button className="w-full border border-purple-700 text-purple-700 py-3 rounded-lg font-medium hover:bg-purple-50 transition-colors">
-        Lưu sự kiện
-      </button>
     </div>
   );
 };

@@ -53,7 +53,7 @@ const LiveCheckInLog: React.FC<LiveCheckInLogProps> = ({
   const fetchLogs = useCallback(async () => {
     try {
       const result = await getCheckInLogs(eventId, 20, 0);
-      
+
       // Handle different response formats
       if (result?.success && result?.data) {
         const logsData = Array.isArray(result.data)
@@ -87,11 +87,22 @@ const LiveCheckInLog: React.FC<LiveCheckInLogProps> = ({
     }
   }, [eventId, connected, joinEvent, leaveEvent]);
 
-  // Load initial logs
+  // Load initial logs and set up periodic refresh
   useEffect(() => {
     if (eventId) {
       fetchLogs();
     }
+  }, [eventId, fetchLogs]);
+
+  // Periodic refresh to update pagination total (every 30 seconds)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (eventId) {
+        fetchLogs();
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, [eventId, fetchLogs]);
 
   // Listen for new check-in events
@@ -117,15 +128,18 @@ const LiveCheckInLog: React.FC<LiveCheckInLogProps> = ({
           staffName: checkInData.staffName,
         };
 
-        setLiveLogs((prev) => [newLog, ...prev]);
+        // Check if this log already exists in the current logs
+        const existsInLogs = logs.some((log) => log.id === newLog.id);
+        const existsInLiveLogs = liveLogs.some((log) => log.id === newLog.id);
 
-        // Refetch the logs to update pagination
-        fetchLogs();
+        if (!existsInLogs && !existsInLiveLogs) {
+          setLiveLogs((prev) => [newLog, ...prev]);
+        }
       }
     });
 
     return unsubscribe;
-  }, [connected, eventId, onNewCheckIn, fetchLogs]);
+  }, [connected, eventId, onNewCheckIn, logs, liveLogs]);
 
   // Merge live logs with existing logs
   const safeLogs = Array.isArray(logs) ? logs : [];
@@ -208,16 +222,7 @@ const LiveCheckInLog: React.FC<LiveCheckInLogProps> = ({
       {/* Pagination */}
       {pagination && (
         <div className="p-4 border-t border-gray-200">
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-500">
-              Hiển thị {displayLogs.length} /{" "}
-              {pagination.total + liveLogs.length} logs
-              {liveLogs.length > 0 && (
-                <span className="text-green-600 ml-1">
-                  ({liveLogs.length} mới)
-                </span>
-              )}
-            </div>
+          <div className="flex items-center justify-end">
             <div className="flex items-center space-x-2">
               <button
                 onClick={() =>

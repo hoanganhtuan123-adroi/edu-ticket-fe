@@ -37,6 +37,7 @@ export interface EventDetailResponse {
   startTime: string;
   endTime: string;
   createdAt: string;
+  isRegistered: boolean; // Add registration status field
   settings?: {
     speakers?: Array<{
       name: string;
@@ -65,6 +66,11 @@ export interface EventDetailResponse {
     fullName: string;
     email: string;
   };
+}
+
+export interface EventStatsResponse {
+  totalRegisteredEvents: number;
+  upcomingEvents: number;
 }
 
 export const eventService = {
@@ -147,7 +153,7 @@ export const eventService = {
     }
   },
 
-  // Get organizer's events
+  // Get list events for client
   getListEvents: async (filters?: {
     limit?: number;
     offset?: number;
@@ -179,6 +185,24 @@ export const eventService = {
     } catch (error: any) {
       throw new Error(
         error.response?.data?.message || "Không thể lấy danh sách sự kiện",
+      );
+    }
+  },
+
+  // Get user's registered events statistics
+  getRegisteredEventsStats: async (): Promise<any> => {
+    try {
+      const token = getOrganizerToken();
+      const response = await api.get(
+        "/events/client/registered-events-stats",
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
+      return response;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || "Không thể lấy thống kê sự kiện đã đăng ký",
       );
     }
   },

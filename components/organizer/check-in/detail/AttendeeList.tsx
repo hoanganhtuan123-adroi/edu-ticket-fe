@@ -12,10 +12,11 @@ interface Attendee {
 }
 
 interface Pagination {
-  page: number;
   limit: number;
+  offset: number;
   total: number;
-  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
 }
 
 interface AttendeeListProps {
@@ -40,6 +41,9 @@ const AttendeeList = memo<AttendeeListProps>(({
   const [filterStatus, setFilterStatus] = useState<'all' | 'checked-in' | 'not-checked-in'>('all');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Calculate current page from offset and limit
+  const calculatedPage = pagination ? Math.floor(pagination.offset / pagination.limit) + 1 : 1;
 
   // Memoize the filter label function
   const getFilterLabel = useCallback((filter: 'all' | 'checked-in' | 'not-checked-in') => {
@@ -271,23 +275,23 @@ const AttendeeList = memo<AttendeeListProps>(({
         {pagination && (
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-700">
-              Hiển thị {(pagination.page - 1) * pagination.limit + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)} của {pagination.total} kết quả
+              Hiển thị {pagination.offset + 1}-{Math.min(pagination.offset + pagination.limit, pagination.total)} của {pagination.total} kết quả
             </div>
             <div className="flex items-center space-x-2">
               <button 
                 className="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={pagination.page <= 1}
-                onClick={() => handlePageChange(pagination.page - 1)}
+                disabled={!pagination.hasPrev}
+                onClick={() => handlePageChange(calculatedPage - 1)}
               >
                 Trước
               </button>
               <span className="text-sm text-gray-600">
-                Trang {pagination.page} / {pagination.totalPages}
+                Trang {calculatedPage} / {Math.ceil(pagination.total / pagination.limit)}
               </span>
               <button 
                 className="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={pagination.page >= pagination.totalPages}
-                onClick={() => handlePageChange(pagination.page + 1)}
+                disabled={!pagination.hasNext}
+                onClick={() => handlePageChange(calculatedPage + 1)}
               >
                 Sau
               </button>

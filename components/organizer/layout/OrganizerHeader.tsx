@@ -2,7 +2,15 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Menu, X, LogOut, User, FileText, ChevronDown, Settings, ScanQrCode } from "lucide-react";
+import {
+  Menu,
+  X,
+  LogOut,
+  User,
+  FileText,
+  ChevronDown,
+  Settings,
+} from "lucide-react";
 import Link from "next/link";
 import { OrganizerNotificationBell } from "../notification/NotificationBell";
 
@@ -14,14 +22,17 @@ export default function OrganizerHeader() {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
         setIsUserMenuOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -44,7 +55,7 @@ export default function OrganizerHeader() {
                 EventTicket.edu
               </span>
               <span className="text-xs lg:text-sm text-emerald-600 font-semibold tracking-wide">
-                Organizer
+                Ban tổ chức
               </span>
             </div>
           </div>
@@ -65,13 +76,7 @@ export default function OrganizerHeader() {
               Sự kiện
               <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-emerald-600 transition-all duration-200 group-hover:w-8 group-hover:left-1/2 group-hover:-translate-x-1/2"></span>
             </Link>
-            <Link
-              href="/organizer/tickets"
-              className="text-gray-600 hover:text-emerald-600 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-emerald-50 relative group"
-            >
-              Vé
-              <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-emerald-600 transition-all duration-200 group-hover:w-8 group-hover:left-1/2 group-hover:-translate-x-1/2"></span>
-            </Link>
+
             <Link
               href="/organizer/support"
               className="text-gray-600 hover:text-emerald-600 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-emerald-50 relative group"
@@ -80,10 +85,10 @@ export default function OrganizerHeader() {
               <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-emerald-600 transition-all duration-200 group-hover:w-8 group-hover:left-1/2 group-hover:-translate-x-1/2"></span>
             </Link>
             <Link
-              href="/organizer/analytics"
+              href="/organizer/register-event"
               className="text-gray-600 hover:text-emerald-600 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-emerald-50 relative group"
             >
-              Thống kê
+              Danh sách đăng lý
               <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-emerald-600 transition-all duration-200 group-hover:w-8 group-hover:left-1/2 group-hover:-translate-x-1/2"></span>
             </Link>
             <Link
@@ -113,11 +118,15 @@ export default function OrganizerHeader() {
                   transition={{ duration: 0.2 }}
                 >
                   <div className="w-9 h-9 lg:w-10 lg:h-10 bg-linear-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow duration-200">
-                    <span className="text-white text-sm lg:text-base font-bold">O</span>
+                    <span className="text-white text-sm lg:text-base font-bold">
+                      O
+                    </span>
                   </div>
                 </motion.div>
                 <div className="hidden lg:block text-left">
-                  <p className="text-sm font-semibold text-gray-900 group-hover:text-emerald-600 transition-colors">Organizer</p>
+                  <p className="text-sm font-semibold text-gray-900 group-hover:text-emerald-600 transition-colors">
+                    Organizer
+                  </p>
                   <p className="text-xs text-gray-500">organizer@edu.vn</p>
                 </div>
                 <motion.div
@@ -153,7 +162,7 @@ export default function OrganizerHeader() {
                         <span className="font-medium">Thông tin tài khoản</span>
                       </Link>
                     </motion.div>
-                    
+
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -168,7 +177,7 @@ export default function OrganizerHeader() {
                         <span className="font-medium">Xem yêu cầu đã gửi</span>
                       </Link>
                     </motion.div>
-                    
+
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -176,7 +185,7 @@ export default function OrganizerHeader() {
                     >
                       <hr className="my-2 border-gray-100" />
                     </motion.div>
-                    
+
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -191,7 +200,7 @@ export default function OrganizerHeader() {
                         <span className="font-medium">Cài đặt</span>
                       </Link>
                     </motion.div>
-                    
+
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -201,7 +210,7 @@ export default function OrganizerHeader() {
                         onClick={() => {
                           setIsUserMenuOpen(false);
                           // Handle logout logic here
-                          console.log('Logout clicked');
+                          console.log("Logout clicked");
                         }}
                         className="flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 group"
                       >
@@ -336,7 +345,7 @@ export default function OrganizerHeader() {
                     Check-in
                   </Link>
                 </motion.div>
-                
+
                 {/* Mobile notifications */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
@@ -345,12 +354,14 @@ export default function OrganizerHeader() {
                 >
                   <div className="px-4 py-3 bg-white rounded-lg border border-gray-200">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-700">Thông báo</span>
+                      <span className="text-sm font-medium text-gray-700">
+                        Thông báo
+                      </span>
                       <OrganizerNotificationBell />
                     </div>
                   </div>
                 </motion.div>
-                
+
                 {/* Mobile user menu */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
@@ -359,7 +370,7 @@ export default function OrganizerHeader() {
                 >
                   <hr className="my-3 border-gray-200" />
                 </motion.div>
-                
+
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -373,7 +384,7 @@ export default function OrganizerHeader() {
                     Thông tin tài khoản
                   </Link>
                 </motion.div>
-                
+
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -387,7 +398,7 @@ export default function OrganizerHeader() {
                     Xem yêu cầu đã gửi
                   </Link>
                 </motion.div>
-                
+
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -401,7 +412,7 @@ export default function OrganizerHeader() {
                     Cài đặt
                   </Link>
                 </motion.div>
-                
+
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -410,7 +421,7 @@ export default function OrganizerHeader() {
                   <button
                     onClick={() => {
                       setIsMobileMenuOpen(false);
-                      console.log('Logout clicked');
+                      console.log("Logout clicked");
                     }}
                     className="w-full text-left px-4 py-3 text-red-600 hover:text-red-700 font-semibold bg-white rounded-lg hover:bg-red-50 transition-all duration-200 border border-transparent hover:border-red-200 flex items-center"
                   >

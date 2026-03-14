@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { eventService, EventDetailResponse } from '@/service/user/event.service';
+import { eventService, EventDetailResponse, EventStatsResponse } from '@/service/user/event.service';
 
 export interface Event {
   title: string;
@@ -17,6 +17,7 @@ export interface Event {
   category: string;
   minPrice: number | null; // Add minimum price field
   maxPrice: number | null; // Add maximum price field
+  isRegistered: boolean; // Add registration status field
 }
 
 export interface PaginatedEventsResponse {
@@ -146,6 +147,47 @@ export const useEventDetail = (slug: string) => {
 
   return {
     event,
+    loading,
+    error,
+    refresh,
+  };
+};
+
+export const useEventStats = () => {
+  const [stats, setStats] = useState<EventStatsResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await eventService.getRegisteredEventsStats();
+      
+      if (response.success && response.data) {
+        setStats(response.data);
+      } else {
+        throw new Error(response.message || 'Không thể lấy thống kê sự kiện');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Đã có lỗi xảy ra khi lấy thống kê');
+      setStats(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const refresh = () => {
+    fetchStats();
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  return {
+    stats,
     loading,
     error,
     refresh,

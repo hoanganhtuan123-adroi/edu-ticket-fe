@@ -35,20 +35,20 @@ const CheckInDetailPage = () => {
   const [logs, setLogs] = useState<any>(null);
   const [staff, setStaff] = useState<any>(null);
   const [filters, setFilters] = useState({
-    search: '',
-    filter: 'all' as 'all' | 'checked-in' | 'not-checked-in',
+    search: "",
+    filter: "all" as "all" | "checked-in" | "not-checked-in",
     limit: 10,
-    offset: 0
+    offset: 0,
   });
 
   const [logsFilters, setLogsFilters] = useState({
     limit: 20,
-    offset: 0
+    offset: 0,
   });
 
   const [staffFilters, setStaffFilters] = useState({
     limit: 10,
-    offset: 0
+    offset: 0,
   });
 
   // Mock data for AssignedStaff (will be replaced with API later)
@@ -57,20 +57,20 @@ const CheckInDetailPage = () => {
       id: "1",
       name: "Hoàng Anh Tuấn",
       role: "MANAGER",
-      status: true
+      status: true,
     },
     {
-      id: "2", 
+      id: "2",
       name: "Nguyễn Văn A",
       role: "STAFF",
-      status: true
+      status: true,
     },
     {
       id: "3",
       name: "Trần Thị B",
-      role: "STAFF", 
-      status: false
-    }
+      role: "STAFF",
+      status: false,
+    },
   ];
 
   const fetchAllData = useCallback(async () => {
@@ -93,7 +93,7 @@ const CheckInDetailPage = () => {
         filters.limit,
         filters.offset,
         filters.search,
-        filters.filter
+        filters.filter,
       );
 
       if (attendeesResponse?.success) {
@@ -102,14 +102,21 @@ const CheckInDetailPage = () => {
     } catch (error) {
       console.error("Error fetching attendees:", error);
     }
-  }, [eventId, filters.limit, filters.offset, filters.search, filters.filter, getEventAttendees]);
+  }, [
+    eventId,
+    filters.limit,
+    filters.offset,
+    filters.search,
+    filters.filter,
+    getEventAttendees,
+  ]);
 
   const fetchLogs = useCallback(async () => {
     try {
       const logsResponse = await getCheckInLogs(
         eventId,
         logsFilters.limit,
-        logsFilters.offset
+        logsFilters.offset,
       );
 
       if (logsResponse?.success) {
@@ -130,7 +137,7 @@ const CheckInDetailPage = () => {
       const staffResponse = await getEventStaff(
         eventId,
         staffFilters.limit,
-        staffFilters.offset
+        staffFilters.offset,
       );
 
       if (staffResponse?.success) {
@@ -148,7 +155,7 @@ const CheckInDetailPage = () => {
             total: staffResponse.data.pagination.total,
             hasNext: staffResponse.data.pagination.hasNext,
             hasPrev: staffResponse.data.pagination.hasPrev,
-          }
+          },
         };
         setStaff(transformedData);
       }
@@ -157,30 +164,33 @@ const CheckInDetailPage = () => {
     }
   }, [eventId, staffFilters, getEventStaff]);
 
-  const handleFilterChange = useCallback((newFilters: {
-    search: string;
-    filter: 'all' | 'checked-in' | 'not-checked-in';
-    page: number;
-  }) => {
-    setFilters(prev => ({
-      ...prev,
-      search: newFilters.search,
-      filter: newFilters.filter,
-      offset: (newFilters.page - 1) * prev.limit // Convert page to offset
-    }));
-  }, []);
+  const handleFilterChange = useCallback(
+    (newFilters: {
+      search: string;
+      filter: "all" | "checked-in" | "not-checked-in";
+      page: number;
+    }) => {
+      setFilters((prev) => ({
+        ...prev,
+        search: newFilters.search,
+        filter: newFilters.filter,
+        offset: (newFilters.page - 1) * prev.limit, // Convert page to offset
+      }));
+    },
+    [],
+  );
 
   const handleLogsPageChange = useCallback((newOffset: number) => {
-    setLogsFilters(prev => ({
+    setLogsFilters((prev) => ({
       ...prev,
-      offset: newOffset
+      offset: newOffset,
     }));
   }, []);
 
   const handleStaffPageChange = useCallback((newOffset: number) => {
-    setStaffFilters(prev => ({
+    setStaffFilters((prev) => ({
       ...prev,
-      offset: newOffset
+      offset: newOffset,
     }));
   }, []);
 
@@ -259,11 +269,10 @@ const CheckInDetailPage = () => {
               href="/organizer/check-in"
               className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 mb-4 inline-block"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Events</span>
+              Quay lại sự kiện
             </Link>
             <h1 className="text-3xl font-bold text-gray-900">
-              Check-in Details
+              Chi tiết check-in
             </h1>
           </div>
 
@@ -280,8 +289,8 @@ const CheckInDetailPage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Attendee List */}
             <section id="attendees" className="lg:col-span-2">
-              <AttendeeList 
-                attendees={attendees?.data || []} 
+              <AttendeeList
+                attendees={attendees?.data || []}
                 pagination={attendees?.pagination}
                 isLoading={isLoading}
                 onFilterChange={handleFilterChange}
@@ -290,7 +299,7 @@ const CheckInDetailPage = () => {
 
             {/* Live Check-in Log */}
             <section className="lg:col-span-1">
-              <LiveCheckInLog 
+              <LiveCheckInLog
                 eventId={eventId}
                 pagination={logs?.pagination}
                 onPageChange={handleLogsPageChange}
@@ -300,15 +309,17 @@ const CheckInDetailPage = () => {
 
           {/* Assigned Staff */}
           <section id="staff" className="mt-8">
-            <AssignedStaff 
+            <AssignedStaff
               staff={staff?.data || []}
-              pagination={staff?.pagination || {
-                limit: 10,
-                offset: 0,
-                total: 0,
-                hasNext: false,
-                hasPrev: false
-              }}
+              pagination={
+                staff?.pagination || {
+                  limit: 10,
+                  offset: 0,
+                  total: 0,
+                  hasNext: false,
+                  hasPrev: false,
+                }
+              }
               onPageChange={handleStaffPageChange}
             />
           </section>

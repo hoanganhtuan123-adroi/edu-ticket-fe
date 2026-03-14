@@ -3,14 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import MyEvents from "@/components/client/event/MyEvents";
 import { bookingService, MyEvent } from "@/service/user/booking.service";
+import { useEventStats } from "@/hooks/user/useEvent";
 import { Mic, Music, Laptop } from "lucide-react";
 import toast from "react-hot-toast";
-
-// Mock statistics (sẽ thay bằng API sau)
-const stats = {
-  attendedEvents: 12,
-  upcomingEvents: 3,
-};
 
 // Transform API data to table format
 const transformEventData = (events: any[]) => {
@@ -58,6 +53,9 @@ export default function MyEventsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [transformedEvents, setTransformedEvents] = useState<any[]>([]);
+  
+  // Fetch statistics from API
+  const { stats: statsData, loading: statsLoading, error: statsError } = useEventStats();
 
   const fetchEvents = useCallback(async () => {
   try {
@@ -124,11 +122,11 @@ export default function MyEventsPage() {
   return (
     <MyEvents
       events={transformedEvents}
-      loading={loading}
-      error={error}
+      loading={loading || statsLoading}
+      error={error || statsError}
       stats={{
-        attendedEvents: stats.attendedEvents,
-        upcomingEvents: stats.upcomingEvents,
+        attendedEvents: statsData?.totalRegisteredEvents || 0,
+        upcomingEvents: statsData?.upcomingEvents || 0,
         attendedEventsLabel: "Tổng số sự kiện đã đăng ký",
         upcomingEventsLabel: "Sự kiện sắp diễn ra",
         pageTitle: "Sự kiện đã đăng ký",

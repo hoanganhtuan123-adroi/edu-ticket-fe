@@ -36,10 +36,6 @@ const EventDetailPage = () => {
     const labels: { [key: string]: string } = {
       REGULAR: "Thường",
       VIP: "VIP",
-      EARLY_BIRD: "Vé sớm",
-      STUDENT: "Sinh viên",
-      GROUP: "Nhóm",
-      SPONSOR: "Nhà tài trợ",
       FREE: "Miễn phí",
     };
     return labels[type] || type;
@@ -144,6 +140,16 @@ const EventDetailPage = () => {
         color: "bg-gray-500",
         disabled: true,
         message: "Sự kiện chưa có loại vé",
+      };
+    }
+
+    // Check if user is already registered
+    if (event.isRegistered) {
+      return {
+        text: "Đã đăng ký",
+        color: "bg-green-600",
+        disabled: true,
+        message: "Bạn đã đăng ký tham gia sự kiện này",
       };
     }
 

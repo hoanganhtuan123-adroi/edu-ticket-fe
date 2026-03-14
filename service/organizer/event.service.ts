@@ -144,6 +144,27 @@ export const eventService = {
     }
   },
 
+  // Get organizer's event registrations (with ticket type and booking counts)
+  getEventRegistrations: async (filters?: { limit?: number; offset?: number; title?: string; location?: string; status?: string; categoryId?: string }): Promise<any> => {
+    try {
+      const token = getOrganizerToken();
+      const params = new URLSearchParams();
+      if (filters?.limit) params.append('limit', filters.limit.toString());
+      if (filters?.offset) params.append('offset', filters.offset.toString());
+      if (filters?.title) params.append('title', filters.title);
+      if (filters?.location) params.append('location', filters.location);
+      if (filters?.status) params.append('status', filters.status);
+      if (filters?.categoryId) params.append('categoryId', filters.categoryId.toString());
+      
+      const response = await api.get(`/events/organizer-event-registration?${params.toString()}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      return response;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Không thể lấy danh sách đăng ký sự kiện');
+    }
+  },
+
   // Toggle event visibility
   toggleEventVisibility: async (slug: string): Promise<any> => {
     try {

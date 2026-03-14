@@ -66,6 +66,9 @@ export interface Event {
   createdAt?: string;
   updatedAt?: string;
   category?: Category;
+  categoryName?: string;
+  ticketTypeCount?: number;
+  bookingCount?: number;
   approvalHistory?: {
     id: string;
     action: string;
