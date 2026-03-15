@@ -57,6 +57,17 @@ const CheckInPage = () => {
     }));
   };
 
+  const handleCheckInUpdate = (eventId: string, newStats: any) => {
+    // Update the events array with new stats for real-time UI update
+    setEvents(prevEvents => 
+      prevEvents.map(event => 
+        event.id === eventId 
+          ? { ...event, checkInStats: newStats }
+          : event
+      )
+    );
+  };
+
   const handlePagination = (newOffset: number) => {
     setFilters((prev) => ({
       ...prev,
@@ -171,7 +182,12 @@ const CheckInPage = () => {
           ) : (
             <>
               {events.map((event: any, index: number) => (
-                <EventCard key={event.id} event={event} index={index} />
+                <EventCard 
+                  key={event.id} 
+                  event={event} 
+                  index={index} 
+                  onCheckInUpdate={handleCheckInUpdate}
+                />
               ))}
 
               {/* Pagination */}

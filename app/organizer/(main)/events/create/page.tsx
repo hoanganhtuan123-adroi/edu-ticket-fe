@@ -15,6 +15,9 @@ import AttachmentUpload from '@/components/organizer/events/create/AttachmentUpl
 import FormActions from '@/components/organizer/events/create/FormActions';
 import AdditionalInfoForm, { AdditionalInfo } from '@/components/organizer/events/create/AdditionalInfoForm';
 import TicketSaleTimeForm from '@/components/organizer/events/create/TicketSaleTimeForm';
+import CheckInStaffSelector from '@/components/organizer/events/create/CheckInStaffSelector';
+import { useOrganizerUsers } from '@/hooks/organizer/useOrganizerUsers';
+import { SystemRole } from '@/service/organizer/user.service';
 
 export default function CreateEventPage() {
   const router = useRouter();
@@ -27,10 +30,52 @@ export default function CreateEventPage() {
     speakers: [{ name: '', title: '', bio: '' }],
     targetAudience: ''
   });
+  const [selectedCheckInStaff, setSelectedCheckInStaff] = useState<any[]>([]);
+  const [transformedUsers, setTransformedUsers] = useState<any[]>([]);
+  
+  // Centralized toast notification handlers
+  const showSuccessToast = (message: string) => toast.success(message);
+  const showErrorToast = (message: string) => toast.error(message);
   
   // Use hooks
   const { createEvent, isLoading: eventLoading } = useOrganizerEvents();
   const { categories, loading: loadingCategories, error: categoriesError } = useCategories();
+  const { users, loading: loadingUsers, error: usersError, fetchUsers } = useOrganizerUsers({
+    role: SystemRole.USER,
+    limit: 100,
+  });
+
+  // Transform users data and fetch on mount
+  useEffect(() => {
+    fetchUsers();
+  }, []); // Empty dependency array - only call once on mount
+
+  // Transform API users to component format
+  useEffect(() => {
+    const transformed = users.map(user => ({
+      id: user.id,
+      name: user.fullName,
+      studentCode: user.email, // Use email instead of studentCode
+      isSelected: false,
+    }));
+    setTransformedUsers(transformed);
+  }, [users]);
+
+  // Show toast notification when usersError occurs
+  useEffect(() => {
+    if (usersError) {
+      showErrorToast(usersError);
+    }
+  }, [usersError]);
+
+  // Update formData checkInStaff when selection changes
+  useEffect(() => {
+    const checkInStaff = selectedCheckInStaff.map(staff => ({
+      userId: staff.id,
+      staffRole: 'CHECKER'
+    }));
+    setFormData(prev => ({ ...prev, checkInStaff }));
+  }, [selectedCheckInStaff]);
   
   const [formData, setFormData] = useState<CreateEventDto>({
     categoryId: 0,
@@ -42,6 +87,7 @@ export default function CreateEventPage() {
     startSaleTime: '',
     endSaleTime: '',
     ticketTypes: [],
+    checkInStaff: [],
   });
 
   useEffect(() => {
@@ -59,13 +105,13 @@ export default function CreateEventPage() {
 
     // Validate file size (10MB)
     if (file.size > 10 * 1024 * 1024) {
-      toast.error('Kích thước file không được vượt quá 10MB');
+      showErrorToast('Kích thước file không được vượt quá 10MB');
       return;
     }
 
     // Validate file type
     if (!file.type.match(/image\/(jpeg|jpg|png|gif|webp)$/)) {
-      toast.error('Chỉ chấp nhận file ảnh (jpg, png, gif, webp)');
+      showErrorToast('Chỉ chấp nhận file ảnh (jpg, png, gif, webp)');
       return;
     }
 
@@ -186,7 +232,7 @@ export default function CreateEventPage() {
     
     const validationError = validateForm();
     if (validationError) {
-      toast.error(validationError);
+      showErrorToast(validationError);
       return;
     }
     
@@ -243,6 +289,11 @@ export default function CreateEventPage() {
         submitData.append('ticketTypes', JSON.stringify(cleanedTicketTypes));
       }
       
+      // Add check-in staff as JSON string
+      if (formData.checkInStaff && formData.checkInStaff.length > 0) {
+        submitData.append('checkInStaff', JSON.stringify(formData.checkInStaff));
+      }
+      
       // Add settings only if additional info section is shown and has data
       if (showAdditionalInfo) {
         const settings = {
@@ -262,19 +313,19 @@ export default function CreateEventPage() {
       
       await createEvent(submitData);
       
-      toast.success('Tạo sự kiện thành công! Đang chuyển hướng...');
+      showSuccessToast('Tạo sự kiện thành công! Đang chuyển hướng...');
       
       setTimeout(() => {
         router.push('/organizer/events');
       }, 1500);
     } catch (error: any) {
-      toast.error(error.message || 'Tạo sự kiện thất bại. Vui lòng thử lại.');
+      showErrorToast(error.message || 'Tạo sự kiện thất bại. Vui lòng thử lại.');
     }
   };
 
   const handleSaveDraft = async () => {
     if (!formData.title.trim()) {
-      toast.error('Vui lòng nhập tiêu đề sự kiện để lưu nháp');
+      showErrorToast('Vui lòng nhập tiêu đề sự kiện để lưu nháp');
       return;
     }
     
@@ -290,13 +341,13 @@ export default function CreateEventPage() {
       
       await createEvent(cleanedFormData);
       
-      toast.success('Lưu nháp thành công!');
+      showSuccessToast('Lưu nháp thành công!');
       
       setTimeout(() => {
         router.push('/organizer/events');
       }, 1500);
     } catch (error: any) {
-      toast.error(error.message || 'Lưu nháp thất bại. Vui lòng thử lại.');
+      showErrorToast(error.message || 'Lưu nháp thất bại. Vui lòng thử lại.');
     }
   };
 
@@ -383,6 +434,15 @@ export default function CreateEventPage() {
             <TicketTypeManager
               ticketTypes={formData.ticketTypes || []}
               onTicketTypesChange={handleTicketTypesChange}
+            />
+            
+            <CheckInStaffSelector
+              selectedStaff={selectedCheckInStaff}
+              onStaffChange={setSelectedCheckInStaff}
+              users={transformedUsers}
+              loading={loadingUsers}
+              error={usersError}
+              onRetry={fetchUsers}
             />
             
             <FormActions

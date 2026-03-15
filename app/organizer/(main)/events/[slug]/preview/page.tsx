@@ -1,36 +1,38 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import toast from 'react-hot-toast';
-import { eventService } from '@/service/organizer/event.service';
-import { Event, TicketType, EventDetailResponse } from '@/types/event.types';
-import EventStatusBadge from '@/components/organizer/events/detail/EventStatusBadge';
-import EventBanner from '@/components/organizer/events/detail/EventBanner';
-import EventInfo from '@/components/organizer/events/detail/EventInfo';
-import EventTicketTypes from '@/components/organizer/events/detail/EventTicketTypes';
-import EventPreviewActions from '@/components/organizer/events/detail/EventPreviewActions';
-import { Clock, CheckCircle, XCircle, X, Download } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import toast from "react-hot-toast";
+import { eventService } from "@/service/organizer/event.service";
+import { Event, TicketType, EventDetailResponse } from "@/types/event.types";
+import EventStatusBadge from "@/components/organizer/events/detail/EventStatusBadge";
+import EventBanner from "@/components/organizer/events/detail/EventBanner";
+import EventInfo from "@/components/organizer/events/detail/EventInfo";
+import EventTicketTypes from "@/components/organizer/events/detail/EventTicketTypes";
+import EventPreviewActions from "@/components/organizer/events/detail/EventPreviewActions";
+import EventStaffList from "@/components/organizer/events/detail/EventStaffList";
+import { Clock, CheckCircle, XCircle, X, Download } from "lucide-react";
 
 // Utility functions
 const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 Bytes';
+  if (bytes === 0) return "0 Bytes";
   const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  const r = Math.round(bytes / Math.pow(k, i) * 100) / 100;
+  const r = Math.round((bytes / Math.pow(k, i)) * 100) / 100;
   return `${r} ${sizes[i]}`;
 };
 
 const getFileTypeLabel = (fileType: string): string => {
   const typeMap: { [key: string]: string } = {
-    'application/pdf': 'PDF',
-    'application/msword': 'Word',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'Word',
-    'image/jpeg': 'JPEG',
-    'image/png': 'PNG',
-    'image/gif': 'GIF',
-    'image/webp': 'WebP',
+    "application/pdf": "PDF",
+    "application/msword": "Word",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+      "Word",
+    "image/jpeg": "JPEG",
+    "image/png": "PNG",
+    "image/gif": "GIF",
+    "image/webp": "WebP",
   };
   return typeMap[fileType] || fileType;
 };
@@ -39,7 +41,7 @@ export default function EventPreviewPage() {
   const router = useRouter();
   const params = useParams();
   const slug = params.slug as string;
-  
+
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -56,11 +58,11 @@ export default function EventPreviewPage() {
       if (response.success && response.data) {
         setEvent(response.data);
       } else {
-        throw new Error(response.message || 'Không thể tải thông tin sự kiện');
+        throw new Error(response.message || "Không thể tải thông tin sự kiện");
       }
     } catch (error: any) {
-      toast.error(error.message || 'Không thể tải thông tin sự kiện');
-      router.push('/organizer/events');
+      toast.error(error.message || "Không thể tải thông tin sự kiện");
+      router.push("/organizer/events");
     } finally {
       setLoading(false);
     }
@@ -68,19 +70,19 @@ export default function EventPreviewPage() {
 
   const handleSubmitForApproval = async () => {
     if (!event || !event.slug) return;
-    
+
     setSubmitting(true);
-    
+
     try {
       const response = await eventService.submitForApproval(event.slug);
       if (response.success) {
-        toast.success('Gửi sự kiện phê duyệt thành công!');
-        router.push('/organizer/events');
+        toast.success("Gửi sự kiện phê duyệt thành công!");
+        router.push("/organizer/events");
       } else {
-        throw new Error(response.message || 'Gửi phê duyệt thất bại');
+        throw new Error(response.message || "Gửi phê duyệt thất bại");
       }
     } catch (error: any) {
-      toast.error(error.message || 'Gửi phê duyệt thất bại');
+      toast.error(error.message || "Gửi phê duyệt thất bại");
     } finally {
       setSubmitting(false);
     }
@@ -88,19 +90,19 @@ export default function EventPreviewPage() {
 
   const handleResubmitForApproval = async () => {
     if (!event || !event.slug) return;
-    
+
     setResubmitting(true);
-    
+
     try {
       const response = await eventService.resubmitEventForApproval(event.slug);
       if (response.success) {
-        toast.success('Gửi lại sự kiện phê duyệt thành công!');
-        router.push('/organizer/events');
+        toast.success("Gửi lại sự kiện phê duyệt thành công!");
+        router.push("/organizer/events");
       } else {
-        throw new Error(response.message || 'Gửi lại phê duyệt thất bại');
+        throw new Error(response.message || "Gửi lại phê duyệt thất bại");
       }
     } catch (error: any) {
-      toast.error(error.message || 'Gửi lại phê duyệt thất bại');
+      toast.error(error.message || "Gửi lại phê duyệt thất bại");
     } finally {
       setResubmitting(false);
     }
@@ -108,21 +110,27 @@ export default function EventPreviewPage() {
 
   const handleToggleVisibility = async () => {
     if (!event || !event.slug) return;
-    
+
     try {
       const response = await eventService.toggleEventVisibility(event.slug);
       if (response.success && response.data) {
         // Update local event state
         setEvent({
           ...event,
-          isVisible: response.data.isVisible
+          isVisible: response.data.isVisible,
         });
-        toast.success(response.data.isVisible ? 'Hiển thị sự kiện thành công!' : 'Ẩn sự kiện thành công!');
+        toast.success(
+          response.data.isVisible
+            ? "Hiển thị sự kiện thành công!"
+            : "Ẩn sự kiện thành công!",
+        );
       } else {
-        throw new Error(response.message || 'Thay đổi trạng thái hiển thị thất bại');
+        throw new Error(
+          response.message || "Thay đổi trạng thái hiển thị thất bại",
+        );
       }
     } catch (error: any) {
-      toast.error(error.message || 'Thay đổi trạng thái hiển thị thất bại');
+      toast.error(error.message || "Thay đổi trạng thái hiển thị thất bại");
     }
   };
 
@@ -160,12 +168,14 @@ export default function EventPreviewPage() {
         <div className="max-w-6xl mx-auto">
           {/* Page Header */}
           <div className="mb-6 lg:mb-8">
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Xem trước sự kiện</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
+              Xem trước sự kiện
+            </h1>
             <p className="text-gray-600 mt-1 text-sm lg:text-base">
               Kiểm tra lại thông tin sự kiện trước khi gửi phê duyệt
             </p>
           </div>
-          
+
           {/* Event Status Badge */}
           <div className="mb-6">
             <EventStatusBadge status={event.status} />
@@ -178,27 +188,49 @@ export default function EventPreviewPage() {
               <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
                 {/* Banner Image */}
                 <EventBanner event={event} />
-                
+
                 {/* Content */}
                 <div className="p-6 sm:p-8 lg:p-10 space-y-8">
                   {/* Description */}
                   {event.description && (
                     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
                       <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <svg
+                          className="w-6 h-6 text-blue-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
                         </svg>
                         Mô tả sự kiện
                       </h3>
-                      <p className="text-gray-700 leading-relaxed text-sm sm:text-base whitespace-pre-wrap">{event.description}</p>
+                      <p className="text-gray-700 leading-relaxed text-sm sm:text-base whitespace-pre-wrap">
+                        {event.description}
+                      </p>
                     </div>
                   )}
-                  
+
                   {/* Event Info */}
                   <div>
                     <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <svg
+                        className="w-6 h-6 text-blue-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
                       </svg>
                       Thông tin chi tiết
                     </h3>
@@ -209,79 +241,115 @@ export default function EventPreviewPage() {
                   {event.settings && (
                     <div className="space-y-6">
                       {/* Speakers Section */}
-                      {(event.settings as any).speakers && (event.settings as any).speakers.length > 0 && (
-                        <div>
-                          <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                            <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            Diễn giả
-                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-600 border border-blue-100">
-                              {(event.settings as any).speakers.length} diễn giả
-                            </span>
-                          </h3>
-                          <div className="space-y-4">
-                            {(event.settings as any).speakers.map((speaker: any, index: number) => (
-                              <div key={index} className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
-                                <div className="flex gap-4">
-                                  {/* Speaker Avatar */}
-                                  <div className="shrink-0">
-                                    {speaker.avatar ? (
-                                      <img
-                                        src={speaker.avatar}
-                                        alt={speaker.name}
-                                        className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm"
-                                        onError={(e) => {
-                                          e.currentTarget.src = '/placeholder-avatar.jpg';
-                                        }}
-                                      />
-                                    ) : (
-                                      <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold text-lg shadow-sm">
-                                        {speaker.name?.charAt(0)?.toUpperCase() || 'D'}
+                      {(event.settings as any).speakers &&
+                        (event.settings as any).speakers.length > 0 && (
+                          <div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                              <svg
+                                className="w-6 h-6 text-blue-600"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                />
+                              </svg>
+                              Diễn giả
+                              <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-600 border border-blue-100">
+                                {(event.settings as any).speakers.length} diễn
+                                giả
+                              </span>
+                            </h3>
+                            <div className="space-y-4">
+                              {(event.settings as any).speakers.map(
+                                (speaker: any, index: number) => (
+                                  <div
+                                    key={index}
+                                    className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100"
+                                  >
+                                    <div className="flex gap-4">
+                                      {/* Speaker Avatar */}
+                                      <div className="shrink-0">
+                                        {speaker.avatar ? (
+                                          <img
+                                            src={speaker.avatar}
+                                            alt={speaker.name}
+                                            className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm"
+                                            onError={(e) => {
+                                              e.currentTarget.src =
+                                                "/placeholder-avatar.jpg";
+                                            }}
+                                          />
+                                        ) : (
+                                          <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold text-lg shadow-sm">
+                                            {speaker.name
+                                              ?.charAt(0)
+                                              ?.toUpperCase() || "D"}
+                                          </div>
+                                        )}
                                       </div>
-                                    )}
-                                  </div>
-                                  
-                                  {/* Speaker Info */}
-                                  <div className="flex-1">
-                                    <div className="space-y-2">
-                                      <div className="flex items-center gap-2">
-                                        <span className="font-medium text-gray-600">Diễn giả:</span>
-                                        <h4 className="font-semibold text-gray-900 text-lg">
-                                          {speaker.name}
-                                        </h4>
-                                      </div>
-                                      {speaker.title && (
-                                        <div className="flex items-center gap-2">
-                                          <span className="font-medium text-gray-600">Chức vụ:</span>
-                                          <p className="text-sm text-purple-600 font-medium">
-                                            {speaker.title}
-                                          </p>
+
+                                      {/* Speaker Info */}
+                                      <div className="flex-1">
+                                        <div className="space-y-2">
+                                          <div className="flex items-center gap-2">
+                                            <span className="font-medium text-gray-600">
+                                              Diễn giả:
+                                            </span>
+                                            <h4 className="font-semibold text-gray-900 text-lg">
+                                              {speaker.name}
+                                            </h4>
+                                          </div>
+                                          {speaker.title && (
+                                            <div className="flex items-center gap-2">
+                                              <span className="font-medium text-gray-600">
+                                                Chức vụ:
+                                              </span>
+                                              <p className="text-sm text-purple-600 font-medium">
+                                                {speaker.title}
+                                              </p>
+                                            </div>
+                                          )}
                                         </div>
-                                      )}
-                                    </div>
-                                    {speaker.bio && (
-                                      <div className="bg-white rounded-lg p-3 border border-blue-200 mt-3">
-                                        <p className="text-sm text-gray-700 leading-relaxed">
-                                          <span className="font-medium text-gray-600">Tiểu sử: </span>
-                                          {speaker.bio}
-                                        </p>
+                                        {speaker.bio && (
+                                          <div className="bg-white rounded-lg p-3 border border-blue-200 mt-3">
+                                            <p className="text-sm text-gray-700 leading-relaxed">
+                                              <span className="font-medium text-gray-600">
+                                                Tiểu sử:{" "}
+                                              </span>
+                                              {speaker.bio}
+                                            </p>
+                                          </div>
+                                        )}
                                       </div>
-                                    )}
+                                    </div>
                                   </div>
-                                </div>
-                              </div>
-                            ))}
+                                ),
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
 
                       {/* Target Audience Section */}
                       {(event.settings as any).targetAudience && (
                         <div>
                           <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            <svg
+                              className="w-6 h-6 text-green-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M13 10V3L4 14h7v7l9-11h-7z"
+                              />
                             </svg>
                             Đối tượng tham gia
                           </h3>
@@ -308,59 +376,78 @@ export default function EventPreviewPage() {
                     Lịch sử phê duyệt
                   </h3>
                   <div className="space-y-3">
-                    {event.approvalHistory.map((history: any, index: number) => (
-                      <div key={history.id} className="bg-white rounded-lg p-4 border border-amber-200">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-2">
-                            {history.action === 'APPROVED' ? (
-                              <CheckCircle className="w-4 h-4 text-green-600" />
-                            ) : history.action === 'REJECTED' ? (
-                              <XCircle className="w-4 h-4 text-red-600" />
-                            ) : (
-                              <Clock className="w-4 h-4 text-blue-600" />
-                            )}
-                            <span className={`font-medium text-sm ${
-                              history.action === 'APPROVED' 
-                                ? 'text-green-800' 
-                                : history.action === 'REJECTED'
-                                ? 'text-red-800'
-                                : 'text-blue-800'
-                            }`}>
-                              {history.action === 'APPROVED' ? 'Đã phê duyệt' : 
-                               history.action === 'REJECTED' ? 'Đã bị từ chối' : 'Đã nộp'}
+                    {event.approvalHistory.map(
+                      (history: any, index: number) => (
+                        <div
+                          key={history.id}
+                          className="bg-white rounded-lg p-4 border border-amber-200"
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              {history.action === "APPROVED" ? (
+                                <CheckCircle className="w-4 h-4 text-green-600" />
+                              ) : history.action === "REJECTED" ? (
+                                <XCircle className="w-4 h-4 text-red-600" />
+                              ) : (
+                                <Clock className="w-4 h-4 text-blue-600" />
+                              )}
+                              <span
+                                className={`font-medium text-sm ${
+                                  history.action === "APPROVED"
+                                    ? "text-green-800"
+                                    : history.action === "REJECTED"
+                                      ? "text-red-800"
+                                      : "text-blue-800"
+                                }`}
+                              >
+                                {history.action === "APPROVED"
+                                  ? "Đã phê duyệt"
+                                  : history.action === "REJECTED"
+                                    ? "Đã bị từ chối"
+                                    : "Đã nộp"}
+                              </span>
+                            </div>
+                            <span className="text-xs text-gray-500">
+                              {new Date(history.createdAt).toLocaleString(
+                                "vi-VN",
+                                {
+                                  day: "2-digit",
+                                  month: "2-digit",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                },
+                              )}
                             </span>
                           </div>
-                          <span className="text-xs text-gray-500">
-                            {new Date(history.createdAt).toLocaleString('vi-VN', {
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </span>
+
+                          {history.admin && (
+                            <div className="mb-3">
+                              <p className="text-xs text-gray-500 mb-1">
+                                Người xử lý
+                              </p>
+                              <p className="text-sm font-medium text-gray-900">
+                                {history.admin.fullName || "Hệ thống"}
+                              </p>
+                              <p className="text-xs text-gray-600">
+                                {history.admin.email}
+                              </p>
+                            </div>
+                          )}
+
+                          {history.reason && (
+                            <div>
+                              <p className="text-xs text-gray-500 mb-1">
+                                Lý do
+                              </p>
+                              <p className="text-sm text-gray-700 bg-amber-50 rounded p-2 border border-amber-200">
+                                {history.reason}
+                              </p>
+                            </div>
+                          )}
                         </div>
-                        
-                        {history.admin && (
-                          <div className="mb-3">
-                            <p className="text-xs text-gray-500 mb-1">Người xử lý</p>
-                            <p className="text-sm font-medium text-gray-900">
-                              {history.admin.fullName || 'Hệ thống'}
-                            </p>
-                            <p className="text-xs text-gray-600">{history.admin.email}</p>
-                          </div>
-                        )}
-                        
-                        {history.reason && (
-                          <div>
-                            <p className="text-xs text-gray-500 mb-1">Lý do</p>
-                            <p className="text-sm text-gray-700 bg-amber-50 rounded p-2 border border-amber-200">
-                              {history.reason}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </div>
                 </div>
               )}
@@ -369,30 +456,58 @@ export default function EventPreviewPage() {
               {event.attachments && event.attachments.length > 0 && (
                 <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100 p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 0l6.586-6.586a2 2 0 00-2.828 0l-6.586 6.586a2 2 0 102.828 0l-6.586-6.586a2 2 0 00-2.828 0zM4 10a2 2 0 100-4 2 2 0 012 4z" />
+                    <svg
+                      className="w-5 h-5 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15.172 7l-6.586 6.586a2 2 0 102.828 0l6.586-6.586a2 2 0 00-2.828 0l-6.586 6.586a2 2 0 102.828 0l-6.586-6.586a2 2 0 00-2.828 0zM4 10a2 2 0 100-4 2 2 0 012 4z"
+                      />
                     </svg>
                     Tài liệu đính kèm
                   </h3>
                   <div className="space-y-3">
                     {event.attachments.map((attachment: any) => (
-                      <div key={attachment.id} className="bg-white rounded-lg p-4 border border-blue-200 hover:border-blue-300 transition-colors">
+                      <div
+                        key={attachment.id}
+                        className="bg-white rounded-lg p-4 border border-blue-200 hover:border-blue-300 transition-colors"
+                      >
                         <div className="flex items-center justify-between gap-4">
-                          <div 
+                          <div
                             className="flex-1 min-w-0 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
                             onClick={() => setSelectedAttachment(attachment)}
                           >
                             <div className="flex items-center gap-2 mb-2">
-                              <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707L19.586 4.414A1 1 0 0119 3.586V16a1 1 0 01-1 1h-1z" />
+                              <svg
+                                className="w-4 h-4 text-gray-400 shrink-0"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707L19.586 4.414A1 1 0 0119 3.586V16a1 1 0 01-1 1h-1z"
+                                />
                               </svg>
                               <span className="text-sm font-medium text-gray-900 truncate">
                                 {attachment.fileName}
                               </span>
                             </div>
                             <div className="flex items-center gap-4 text-xs text-gray-500">
-                              <span>Kích thước: {formatFileSize(attachment.fileSize)}</span>
-                              <span>Loại: {getFileTypeLabel(attachment.fileType)}</span>
+                              <span>
+                                Kích thước:{" "}
+                                {formatFileSize(attachment.fileSize)}
+                              </span>
+                              <span>
+                                Loại: {getFileTypeLabel(attachment.fileType)}
+                              </span>
                             </div>
                           </div>
                           <a
@@ -414,25 +529,40 @@ export default function EventPreviewPage() {
 
               {/* Event Status */}
               <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Trạng thái sự kiện</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Trạng thái sự kiện
+                </h3>
                 <div className="space-y-3">
                   <EventStatusBadge status={event.status} />
                   <div className="text-sm text-gray-600">
-                    <p>Ngày tạo: {new Date(event.createdAt || '').toLocaleDateString('vi-VN')}</p>
-                    <p>Cập nhật: {new Date(event.updatedAt || '').toLocaleDateString('vi-VN')}</p>
+                    <p>
+                      Ngày tạo:{" "}
+                      {new Date(event.createdAt || "").toLocaleDateString(
+                        "vi-VN",
+                      )}
+                    </p>
+                    <p>
+                      Cập nhật:{" "}
+                      {new Date(event.updatedAt || "").toLocaleDateString(
+                        "vi-VN",
+                      )}
+                    </p>
                   </div>
                 </div>
               </div>
+
+              {/* Event Staff */}
+              <EventStaffList eventStaff={event.eventStaff} />
             </div>
           </div>
-          
+
           {/* Ticket Types - Full Width */}
           <div className="mt-8">
             <EventTicketTypes event={event} />
           </div>
-          
+
           {/* Action Buttons */}
-          <EventPreviewActions 
+          <EventPreviewActions
             event={event}
             onEdit={handleEdit}
             onSubmitForApproval={handleSubmitForApproval}
@@ -443,7 +573,7 @@ export default function EventPreviewPage() {
           />
         </div>
       </div>
-      
+
       {/* File Preview Modal */}
       {selectedAttachment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -455,7 +585,8 @@ export default function EventPreviewPage() {
                   {selectedAttachment.fileName}
                 </h3>
                 <p className="text-sm text-gray-500">
-                  {getFileTypeLabel(selectedAttachment.fileType)} • {formatFileSize(selectedAttachment.fileSize)}
+                  {getFileTypeLabel(selectedAttachment.fileType)} •{" "}
+                  {formatFileSize(selectedAttachment.fileSize)}
                 </p>
               </div>
               <button
@@ -465,10 +596,10 @@ export default function EventPreviewPage() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             {/* Modal Content */}
             <div className="p-6 overflow-auto max-h-[calc(90vh-120px)]">
-              {selectedAttachment.fileType.startsWith('image/') ? (
+              {selectedAttachment.fileType.startsWith("image/") ? (
                 // Image preview
                 <div className="flex justify-center">
                   <img
@@ -477,7 +608,7 @@ export default function EventPreviewPage() {
                     className="max-w-full max-h-[60vh] object-contain rounded-lg shadow-lg"
                   />
                 </div>
-              ) : selectedAttachment.fileType === 'application/pdf' ? (
+              ) : selectedAttachment.fileType === "application/pdf" ? (
                 // PDF preview
                 <div className="flex justify-center">
                   <iframe
@@ -486,8 +617,9 @@ export default function EventPreviewPage() {
                     title={selectedAttachment.fileName}
                   />
                 </div>
-              ) : selectedAttachment.fileType === 'application/msword' || 
-                     selectedAttachment.fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ? (
+              ) : selectedAttachment.fileType === "application/msword" ||
+                selectedAttachment.fileType ===
+                  "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ? (
                 // Word document preview using Microsoft Office Online Viewer
                 <div className="flex justify-center">
                   <iframe
@@ -496,9 +628,9 @@ export default function EventPreviewPage() {
                     title={selectedAttachment.fileName}
                   />
                 </div>
-              ) : selectedAttachment.fileType.includes('text/') || 
-                     selectedAttachment.fileType === 'application/json' ||
-                     selectedAttachment.fileType.includes('xml') ? (
+              ) : selectedAttachment.fileType.includes("text/") ||
+                selectedAttachment.fileType === "application/json" ||
+                selectedAttachment.fileType.includes("xml") ? (
                 // Text file preview
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <iframe
@@ -510,10 +642,22 @@ export default function EventPreviewPage() {
               ) : (
                 // Unsupported file type
                 <div className="text-center py-12">
-                  <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707L19.586 4.414A1 1 0 0119 3.586V16a1 1 0 01-1 1h-1z" />
+                  <svg
+                    className="w-16 h-16 text-gray-400 mx-auto mb-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707L19.586 4.414A1 1 0 0119 3.586V16a1 1 0 01-1 1h-1z"
+                    />
                   </svg>
-                  <p className="text-gray-600 mb-4">Loại file này không được hỗ trợ xem trước</p>
+                  <p className="text-gray-600 mb-4">
+                    Loại file này không được hỗ trợ xem trước
+                  </p>
                   <a
                     href={`http://localhost:8080${selectedAttachment.fileUrl}`}
                     target="_blank"
@@ -526,7 +670,7 @@ export default function EventPreviewPage() {
                 </div>
               )}
             </div>
-            
+
             {/* Modal Footer */}
             <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
               <button

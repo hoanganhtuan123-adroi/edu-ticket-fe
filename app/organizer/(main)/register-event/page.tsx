@@ -80,7 +80,7 @@ export default function RegisterEventPage() {
   };
 
   const handleManageRegistrations = (slug: string) => {
-    router.push(`/organizer/events/${slug}/registrations`);
+    router.push(`/organizer/register-event/${slug}`);
   };
 
   if (loading) {

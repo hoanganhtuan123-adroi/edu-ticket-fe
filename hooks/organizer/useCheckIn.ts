@@ -105,12 +105,34 @@ export const useCheckIn = () => {
     }
   }, []);
 
+  const manualCheckIn = useCallback(async (attendee: any, note?: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await checkinService.manualCheckIn({
+        studentCode: attendee.mssv,
+        eventId: attendee.eventId || '',
+        deviceId: 'manual-device', // Default device ID for manual check-in
+        note: note,
+        email: attendee.email
+      });
+      return response;
+    } catch (err: any) {
+      setError(err.message || 'Không thể check-in thủ công');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   return {
     getEventsForCheckIn,
     checkInClient,
     getCheckInDashboard,
     getEventAttendees,
     getCheckInLogs,
+    manualCheckIn,
     isLoading,
     error,
     clearError: () => setError(null),

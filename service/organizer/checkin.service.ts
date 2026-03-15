@@ -75,10 +75,13 @@ export interface Attendee {
   id: string;
   name: string;
   mssv: string;
+  email: string;
   registrationDate: string;
   ticketType: string;
   checkInStatus: 'checked-in' | 'not-checked-in';
   checkInTime: string | null;
+  bookingId: string;
+  ticketCode: string;
 }
 
 export interface AttendeesResponse {
@@ -226,6 +229,33 @@ class CheckInService {
 
     const response: any = await api.get(
       `/check-in/events/${eventId}/logs?${params.toString()}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    return response;
+  }
+
+  async manualCheckIn(data: {
+    studentCode: string;
+    eventId: string;
+    deviceId: string;
+    note?: string;
+    email?: string;
+  }): Promise<any> {
+    const token = getOrganizerToken();
+    
+    if (!token) {
+      throw new Error("Không tìm thấy token xác thực");
+    }
+
+    const response: any = await api.post(
+      "/check-in/manual",
+      data,
       {
         headers: {
           Authorization: `Bearer ${token}`,

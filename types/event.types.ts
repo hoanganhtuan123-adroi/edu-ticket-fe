@@ -21,6 +21,11 @@ export interface CreateTicketDto {
   requiresApproval?: boolean;
 }
 
+export interface EventStaffDto {
+  userId: string;
+  staffRole?: string;
+}
+
 export interface TicketTypeData {
   id: string;
   name: string;
@@ -46,6 +51,7 @@ export interface CreateEventDto {
   endSaleTime?: string;
   ticketTypes?: CreateTicketDto[];
   settings?: string | Record<string, any>;
+  checkInStaff?: EventStaffDto[];
 }
 
 export interface Event {
@@ -89,6 +95,13 @@ export interface Event {
     fileSize: number;
     fileType: string;
     fileUrl: string;
+  }[];
+  eventStaff?: {
+    id: string;
+    fullName: string;
+    studentCode?: string;
+    email: string;
+    staffRole: string;
   }[];
 }
 

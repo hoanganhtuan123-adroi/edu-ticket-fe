@@ -24,6 +24,7 @@ const CheckInDetailPage = () => {
     getCheckInDashboard,
     getEventAttendees,
     getCheckInLogs,
+    manualCheckIn,
     isLoading,
     error,
   } = useCheckIn();
@@ -187,6 +188,22 @@ const CheckInDetailPage = () => {
     }));
   }, []);
 
+  const handleManualCheckIn = useCallback(async (attendee: any, note?: string) => {
+    const success = await manualCheckIn({
+      ...attendee,
+      eventId: eventId
+    }, note);
+    
+    if (success) {
+      // Refresh attendees list to show updated status
+      fetchAttendees();
+      // Refresh logs to show new check-in
+      fetchLogs();
+      // Refresh dashboard to update stats in real-time
+      fetchAllData();
+    }
+  }, [eventId, manualCheckIn, fetchAttendees, fetchLogs, fetchAllData]);
+
   const handleStaffPageChange = useCallback((newOffset: number) => {
     setStaffFilters((prev) => ({
       ...prev,
@@ -267,7 +284,7 @@ const CheckInDetailPage = () => {
           <div className="mb-8">
             <Link
               href="/organizer/check-in"
-              className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 mb-4 inline-block"
+              className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-800 mb-4"
             >
               Quay lại sự kiện
             </Link>
@@ -294,6 +311,8 @@ const CheckInDetailPage = () => {
                 pagination={attendees?.pagination}
                 isLoading={isLoading}
                 onFilterChange={handleFilterChange}
+                onManualCheckIn={handleManualCheckIn}
+                eventId={eventId}
               />
             </section>
 

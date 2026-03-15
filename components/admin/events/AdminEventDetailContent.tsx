@@ -10,7 +10,8 @@ import {
   FileText,
   X,
   Target,
-  Shield
+  Shield,
+  Users
 } from 'lucide-react';
 import { AdminEventDetail } from '@/service/admin/event.service';
 import { useState } from 'react';
@@ -398,6 +399,56 @@ export default function AdminEventDetailContent({ event, onApprove, onReject }: 
                       ))}
                     </tbody>
                   </table>
+                </div>
+              </div>
+            )}
+
+            {/* Event Staff */}
+            {event.eventStaff && event.eventStaff.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-blue-600" />
+                  Nhân viên sự kiện ({event.eventStaff.length})
+                </h3>
+                <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+                  {event.eventStaff.map((staff, index) => (
+                    <div key={staff.id} className="flex items-center gap-4 p-4 bg-white rounded-lg border border-gray-200">
+                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-lg shadow-sm">
+                        {staff.fullName?.charAt(0)?.toUpperCase() || 'N'}
+                      </div>
+                      <div className="flex-1">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <p className="text-sm text-gray-500">Họ tên</p>
+                            <p className="font-medium text-gray-900">{staff.fullName}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Email</p>
+                            <p className="font-medium text-gray-900">{staff.email}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Vai trò</p>
+                            <span className={`inline-flex items-center px-2 py-1 text-xs rounded-full ${
+                              staff.staffRole === 'MANAGER' 
+                                ? 'bg-purple-100 text-purple-800' 
+                                : staff.staffRole === 'CHECKER'
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {staff.staffRole === 'MANAGER' ? 'Quản lý' : 
+                               staff.staffRole === 'CHECKER' ? 'Check-in' : staff.staffRole}
+                            </span>
+                          </div>
+                        </div>
+                        {staff.studentCode && (
+                          <div className="mt-2">
+                            <p className="text-sm text-gray-500">Mã sinh viên</p>
+                            <p className="font-medium text-gray-900">{staff.studentCode}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

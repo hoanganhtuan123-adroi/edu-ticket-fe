@@ -65,6 +65,13 @@ export interface AdminEventDetail {
     fileSize: number;
     uploadedAt: string;
   }[];
+  eventStaff?: {
+    id: string;
+    fullName: string;
+    studentCode?: string;
+    email: string;
+    staffRole: string;
+  }[];
 }
 
 export interface AdminEvent {

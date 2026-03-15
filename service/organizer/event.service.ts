@@ -177,4 +177,23 @@ export const eventService = {
       throw new Error(error.response?.data?.message || 'Không thể thay đổi trạng thái hiển thị sự kiện');
     }
   },
+
+  // Get event registrations by event slug
+  getEventRegistersByOrganizer: async (eventSlug: string, filters?: { limit?: number; offset?: number; title?: string; status?: string }): Promise<any> => {
+    try {
+      const token = getOrganizerToken();
+      const params = new URLSearchParams();
+      if (filters?.limit) params.append('limit', filters.limit.toString());
+      if (filters?.offset) params.append('offset', filters.offset.toString());
+      if (filters?.title) params.append('title', filters.title);
+      if (filters?.status) params.append('status', filters.status);
+      
+      const response = await api.get(`/events/${eventSlug}/organizer-event-registers?${params.toString()}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      return response;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Không thể lấy danh sách đăng ký');
+    }
+  },
 };

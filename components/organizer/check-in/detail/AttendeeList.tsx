@@ -1,14 +1,18 @@
 import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
-import { Search, Filter, CheckCircle, XCircle, ChevronDown } from "lucide-react";
+import { Search, Filter, CheckCircle, XCircle, ChevronDown, UserCheck } from "lucide-react";
+import ManualCheckInModal from "./ManualCheckInModal";
 
 interface Attendee {
   id: number;
   name: string;
   mssv: string;
+  email: string;
   registrationDate: string;
   ticketType: string;
   checkInStatus: string;
   checkInTime: string | null;
+  bookingId: string;
+  ticketCode: string;
 }
 
 interface Pagination {
@@ -28,6 +32,8 @@ interface AttendeeListProps {
     filter: 'all' | 'checked-in' | 'not-checked-in';
     page: number;
   }) => void;
+  onManualCheckIn?: (attendee: Attendee, note?: string) => Promise<void>;
+  eventId?: string;
   limit?: number;
 };
 
@@ -35,12 +41,17 @@ const AttendeeList = memo<AttendeeListProps>(({
   attendees, 
   pagination, 
   isLoading, 
-  onFilterChange 
+  onFilterChange,
+  onManualCheckIn,
+  eventId
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'checked-in' | 'not-checked-in'>('all');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showManualCheckInModal, setShowManualCheckInModal] = useState(false);
+  const [selectedAttendee, setSelectedAttendee] = useState<Attendee | null>(null);
+  const [isCheckingIn, setIsCheckingIn] = useState(false);
 
   // Calculate current page from offset and limit
   const calculatedPage = pagination ? Math.floor(pagination.offset / pagination.limit) + 1 : 1;
@@ -76,6 +87,36 @@ const AttendeeList = memo<AttendeeListProps>(({
   const handlePageChange = useCallback((newPage: number) => {
     setCurrentPage(newPage);
   }, []);
+
+  // Handle manual check-in
+  const handleManualCheckIn = useCallback((attendee: Attendee) => {
+    setSelectedAttendee(attendee);
+    setShowManualCheckInModal(true);
+  }, []);
+
+  // Confirm manual check-in
+  const handleConfirmCheckIn = useCallback(async (note?: string) => {
+    if (!selectedAttendee || !onManualCheckIn) return;
+    
+    setIsCheckingIn(true);
+    try {
+      await onManualCheckIn(selectedAttendee, note);
+      setShowManualCheckInModal(false);
+      setSelectedAttendee(null);
+    } catch (error) {
+      console.error('Manual check-in failed:', error);
+    } finally {
+      setIsCheckingIn(false);
+    }
+  }, [selectedAttendee, onManualCheckIn]);
+
+  // Close modal
+  const handleCloseModal = useCallback(() => {
+    if (!isCheckingIn) {
+      setShowManualCheckInModal(false);
+      setSelectedAttendee(null);
+    }
+  }, [isCheckingIn]);
 
   // Debounce search and trigger filter change
   useEffect(() => {
@@ -229,6 +270,9 @@ const AttendeeList = memo<AttendeeListProps>(({
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Thời gian check-in
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Thao tác
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -263,6 +307,19 @@ const AttendeeList = memo<AttendeeListProps>(({
                     <div className="text-sm text-gray-900">
                       {attendee.checkInTime || "-"}
                     </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {attendee.checkInStatus === "checked-in" ? (
+                      <span className="text-green-600 font-medium text-sm">Đã check-in</span>
+                    ) : (
+                      <button
+                        onClick={() => handleManualCheckIn(attendee)}
+                        className="inline-flex items-center space-x-1 px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
+                      >
+                        <UserCheck className="w-4 h-4" />
+                        <span>Check-in</span>
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -313,6 +370,16 @@ const AttendeeList = memo<AttendeeListProps>(({
           </div>
         )}
       </div>
+
+      {/* Manual Check-in Modal */}
+      <ManualCheckInModal
+        isOpen={showManualCheckInModal}
+        onClose={handleCloseModal}
+        attendee={selectedAttendee}
+        eventId={eventId || ""}
+        onConfirm={handleConfirmCheckIn}
+        isLoading={isCheckingIn}
+      />
     </div>
   );
 });

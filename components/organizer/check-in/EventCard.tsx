@@ -8,10 +8,12 @@ import Link from "next/link";
 interface EventCardProps {
   event: CheckInEvent;
   index: number;
+  onCheckInUpdate?: (eventId: string, newStats: any) => void;
 }
 
-const EventCard: React.FC<EventCardProps> = ({ event, index }) => {
+const EventCard: React.FC<EventCardProps> = ({ event, index, onCheckInUpdate }) => {
   const [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
+  const [eventStats, setEventStats] = useState(event.checkInStats); // Local state for real-time updates
 
   const getEventDisplayStatus = (status: string) => {
     const now = new Date();
@@ -127,10 +129,10 @@ const EventCard: React.FC<EventCardProps> = ({ event, index }) => {
                 <p className="text-sm text-gray-500 mb-1">Đã check-in</p>
                 <div className="flex items-baseline">
                   <span className="text-3xl font-bold text-gray-900">
-                    {event.checkInStats.checkedIn}
+                    {eventStats.checkedIn}
                   </span>
                   <span className="text-gray-400 ml-1">
-                    / {event.checkInStats.totalSoldTickets}
+                    / {eventStats.totalSoldTickets}
                   </span>
                 </div>
               </div>
@@ -141,7 +143,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, index }) => {
                 <p className="text-sm text-gray-500 mb-1">Tỷ lệ check-in</p>
                 <div className="flex items-baseline">
                   <span className="text-3xl font-bold text-blue-600">
-                    {event.checkInStats.percentage}%
+                    {eventStats.percentage}%
                   </span>
                 </div>
               </div>
@@ -166,7 +168,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, index }) => {
                     stroke="#3b82f6"
                     strokeWidth="8"
                     fill="none"
-                    strokeDasharray={`${(event.checkInStats.percentage / 100) * 226.2} 226.2`}
+                    strokeDasharray={`${(eventStats.percentage / 100) * 226.2} 226.2`}
                     strokeLinecap="round"
                     className="transition-all duration-700 ease-out"
                   />
@@ -222,6 +224,19 @@ const EventCard: React.FC<EventCardProps> = ({ event, index }) => {
                 onScanSuccess={(result) => {
                   console.log("Check-in successful:", result);
                   // You can update the event stats here if needed
+                }}
+                onCheckInSuccess={() => {
+                  // Cập nhật stats real-time sau khi check-in thành công
+                  const newStats = {
+                    ...eventStats,
+                    checkedIn: eventStats.checkedIn + 1,
+                    percentage: eventStats.totalSoldTickets > 0 
+                      ? Math.round(((eventStats.checkedIn + 1) / eventStats.totalSoldTickets) * 100)
+                      : eventStats.percentage
+                  };
+                  setEventStats(newStats);
+                  // Notify parent component
+                  onCheckInUpdate?.(event.id, newStats);
                 }}
               />
             </div>
