@@ -36,7 +36,8 @@ export default function RegisterEventDetailPage() {
     getEventRegistrations,
     refreshStats,
     approveRegistration,
-    rejectRegistration
+    rejectRegistration,
+    bulkApproveRegistrations
   } = useEventRegistrations();
 
   const fetchRegistrations = async () => {
@@ -84,19 +85,33 @@ export default function RegisterEventDetailPage() {
     router.push(`/organizer/register-event/${eventSlug}/registration/${registrationId}`);
   };
 
-  const handleApprove = async (registrationId: string) => {
-    const success = await approveRegistration(registrationId);
+  const handleApprove = async (bookingCode: string) => {
+    const success = await approveRegistration(bookingCode);
     if (success) {
       fetchRegistrations();
       refreshStats(eventSlug); // Refresh stats after approval
     }
   };
 
-  const handleReject = async (registrationId: string) => {
-    const success = await rejectRegistration(registrationId);
+  const handleReject = async (bookingCode: string) => {
+    const success = await rejectRegistration(bookingCode);
     if (success) {
       fetchRegistrations();
       refreshStats(eventSlug); // Refresh stats after rejection
+    }
+  };
+
+  const handleBulkApprove = async (bookingCodes: string[]) => {
+    try {
+      console.log(`Booking Code ::: ${bookingCodes}`)
+      const success = await bulkApproveRegistrations(bookingCodes);
+      if (success) {
+        fetchRegistrations();
+        refreshStats(eventSlug);
+        toast.success(`Đã duyệt ${bookingCodes.length} đăng ký thành công`);
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Duyệt hàng loạt đăng ký thất bại');
     }
   };
 
@@ -153,6 +168,7 @@ export default function RegisterEventDetailPage() {
         onViewDetails={handleViewDetails}
         onApprove={handleApprove}
         onReject={handleReject}
+        onBulkApprove={handleBulkApprove}
       />
 
       {/* Pagination */}

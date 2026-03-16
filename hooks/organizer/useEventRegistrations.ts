@@ -8,6 +8,7 @@ export interface Registration {
   studentCode: string;
   bookingStatus: string;
   bookingTime: string;
+  bookingCode: string;
 }
 
 export interface RegistrationStats {
@@ -140,6 +141,15 @@ export const useEventRegistrations = () => {
     }
   }, []);
 
+  const bulkApproveRegistrations = useCallback(async (bookingCodes: string[]) => {
+    try {
+      const response = await registrationService.bulkApproveRegistrations(bookingCodes);
+      return response.success;
+    } catch (error: any) {
+      throw error;
+    }
+  }, []);
+
   return {
     registrations,
     stats,
@@ -150,6 +160,7 @@ export const useEventRegistrations = () => {
     getRegistrationDetails,
     refreshStats,
     approveRegistration,
-    rejectRegistration
+    rejectRegistration,
+    bulkApproveRegistrations
   };
 };

@@ -38,26 +38,30 @@ const PaymentDetails: React.FC<PaymentDetailsProps> = ({
           </div>
         </div>
 
-        <div className="flex justify-between">
-          <span className="text-gray-600">Phương thức:</span>
-          <span className="text-gray-900">{paymentMethod}</span>
-        </div>
+        {paymentMethod !== "Unknown" && (
+          <>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Phương thức:</span>
+              <span className="text-gray-900">{paymentMethod}</span>
+            </div>
 
-        {providerTxnRef && (
-          <div className="flex justify-between">
-            <span className="text-gray-600">Mã giao dịch:</span>
-            <span className="font-mono text-gray-900">{providerTxnRef}</span>
-          </div>
+            {providerTxnRef && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Mã giao dịch:</span>
+                <span className="font-mono text-gray-900">{providerTxnRef}</span>
+              </div>
+            )}
+
+            <div className="flex justify-between">
+              <span className="text-gray-600">Thời gian thanh toán:</span>
+              <span className="text-gray-900">
+                {paidAt
+                  ? new Date(paidAt).toLocaleString("vi-VN")
+                  : "Chưa thanh toán"}
+              </span>
+            </div>
+          </>
         )}
-
-        <div className="flex justify-between">
-          <span className="text-gray-600">Thời gian thanh toán:</span>
-          <span className="text-gray-900">
-            {paidAt
-              ? new Date(paidAt).toLocaleString("vi-VN")
-              : "Chưa thanh toán"}
-          </span>
-        </div>
       </div>
     </div>
   );
